@@ -5,9 +5,10 @@ Plugin for PocketMine-MP that prevents people to impersonate an account, requeri
 
 ## Commands
 
-* /login <password>
-* /register <password>
-* /unregister <password>
+
+* `/login <password>`
+* `/register <password>`
+* `/unregister <password>`
 
 ## Configuration
 
