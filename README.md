@@ -19,6 +19,7 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 | allowChat | boolean | false | Allows unauthenticated players to use the chat. They won't be able to use any command. |
 | messageInterval | integer | 5 | Timelapse, in seconds, between the login/register message broadcast to unauthenticated players. |
 | timeout | integer | 60 | Unauthenticated players will be kicked after this period of time. Set it to 0 to disable. |
+| allowRegister | boolean | true | Allows registering and log in through commands. |
 | forceSingleSession | boolean | true | New players won't kick an authenticated player if using the same name. |
 
 
