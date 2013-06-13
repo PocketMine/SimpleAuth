@@ -57,8 +57,7 @@ class SimpleAuth implements Plugin{
 				$d = $this->playerFile->get($issuer->iusername);
 				if($d !== false and $d["hash"] === $this->hash($issuer->iusername, implode(" ", $params))){
 					$this->playerFile->remove($issuer->iusername);
-					$this->sessions[$issuer->CID] = time();
-					$issuer->blocked = true;
+					$this->logout($issuer);
 					$output .= "[SimpleAuth] Unregistered correctly.\n";
 				}else{
 					$output .= "[SimpleAuth] Error during authentication.\n";
@@ -121,6 +120,11 @@ class SimpleAuth implements Plugin{
 		$player->blocked = false;
 		$player->sendChat("[SimpleAuth] You've been authenticated.");
 		return true;
+	}
+	
+	public function logout(Player $player){
+		$this->sessions[$player->CID] = time();
+		$player->blocked = true;
 	}
 	
 	public function register(Player $player, $password){	
@@ -220,5 +224,13 @@ class SimpleAuthAPI{
 	
 	public static function get(){
 		return SimpleAuthAPI::$object;
+	}
+	
+	public static function login(Player $player){
+		return SimpleAuthAPI::$object->login($player);
+	}
+	
+	public static function logout(Player $player){
+		return SimpleAuthAPI::$object->logout($player);
 	}
 }
