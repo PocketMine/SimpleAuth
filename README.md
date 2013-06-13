@@ -25,6 +25,9 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 
 ## For developers
 
-You can use the _login()_ method to authenticate the player directly.
+First, get the SimpleAuth plugin
+`object SimpleAuth SimpleAuthAPI::get()`
+
+You can use the _login()_ method in the API to authenticate the player directly.
 
 `boolean SimpleAuth::login(Player)`
