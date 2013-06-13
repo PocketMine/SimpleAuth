@@ -31,5 +31,7 @@ You can use the _login()_ method in the API to authenticate the player directly.
 
 
 More:
+
 `boolean SimpleAuthAPI::logout(Player object)`
+
 `object SimpleAuth SimpleAuthAPI::get()`
