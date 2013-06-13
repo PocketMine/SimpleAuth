@@ -23,6 +23,7 @@ class SimpleAuth implements Plugin{
 			"allowChat" => false,
 			"messageInterval" => 5,
 			"timeout" => 60,
+			"allowRegister" => true,
 			"forceSingleSession" => true,
 		));
 		$this->playerFile = new Config($this->api->plugin->configPath($this)."players.yml", CONFIG_YAML, array());
@@ -67,7 +68,7 @@ class SimpleAuth implements Plugin{
 	}
 	
 	public function checkTimer(){
-		if(($this->lastBroadcast + $this->config->get("messageInterval")) <= time()){
+		if($this->config->get("allowRegister") !== false and ($this->lastBroadcast + $this->config->get("messageInterval")) <= time()){
 			$broadcast = true;
 			$this->lastBroadcast = time();
 		}else{
@@ -121,8 +122,7 @@ class SimpleAuth implements Plugin{
 		return true;
 	}
 	
-	public function register(Player $player, $password){
-	
+	public function register(Player $player, $password){	
 		$d = $this->playerFile->get($player->iusername);
 		if($d === false){
 			$data = array(
@@ -154,26 +154,28 @@ class SimpleAuth implements Plugin{
 			case "player.spawn":
 				if($this->sessions[$data->CID] !== true){
 					$this->sessions[$data->CID] = time();
-					$data->sendChat("[SimpleAuth] This server uses SimpleAuth to protect your account.");
 					$data->blocked = true;
-					$d = $this->playerFile->get($data->iusername);
-					if($d === false){					
-						$data->sendChat("[SimpleAuth] You must register using /register <password>");
-					}else{
-						$data->sendChat("[SimpleAuth] You must authenticate using /login <password>");
+					$data->sendChat("[SimpleAuth] This server uses SimpleAuth to protect your account.");
+					if($this->config->get("allowRegister") !== false){
+						$d = $this->playerFile->get($data->iusername);
+						if($d === false){					
+							$data->sendChat("[SimpleAuth] You must register using /register <password>");
+						}else{
+							$data->sendChat("[SimpleAuth] You must authenticate using /login <password>");
+						}
 					}
 				}
 				break;
 			case "console.command":
 				if(($data["issuer"] instanceof Player) and $this->sessions[$data["issuer"]->CID] !== true){
-					if($data["cmd"] === "login" and $this->checkLogin($data["issuer"], implode(" ", $data["parameters"])) === true){
+					if($this->config->get("allowRegister") !== false and $data["cmd"] === "login" and $this->checkLogin($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$this->login($data["issuer"]);
 						return true;
-					}elseif($data["cmd"] === "register" and $this->register($data["issuer"], implode(" ", $data["parameters"])) === true){
+					}elseif($this->config->get("allowRegister") !== false and $data["cmd"] === "register" and $this->register($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$data["issuer"]->sendChat("[SimpleAuth] You've been sucesfully registered.");
 						$this->login($data["issuer"]);
 						return true;
-					}elseif($data["cmd"] === "login" or $data["cmd"] === "register"){
+					}elseif($this->config->get("allowRegister") !== false and $data["cmd"] === "login" or $data["cmd"] === "register"){
 						$data["issuer"]->sendChat("[SimpleAuth] Error during authentication.");
 						return true;
 					}
