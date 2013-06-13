@@ -16,6 +16,7 @@ class SimpleAuth implements Plugin{
 		$this->api = $api;
 		$this->server = ServerAPI::request();
 		$this->sessions = array();
+		SimpleAuthAPI::set($this);
 	}
 	
 	public function init(){
@@ -206,4 +207,18 @@ class SimpleAuth implements Plugin{
 		$this->playerFile->save();
 	}
 
+}
+
+class SimpleAuthAPI{
+	private static $object;
+	public static function set(SimpleAuth $plugin){
+		if(SimpleAuthAPI::$object instanceof SimpleAuth){
+			return false;
+		}
+		SimpleAuthAPI::$object = $plugin;
+	}
+	
+	public static function get(){
+		return SimpleAuthAPI::$object;
+	}
 }
