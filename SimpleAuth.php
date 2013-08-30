@@ -7,7 +7,7 @@ description=Prevents people to impersonate an account, requering registration an
 version=0.1
 author=shoghicp
 class=SimpleAuth
-apiversion=9
+apiversion=9,10
 */
 
 class SimpleAuth implements Plugin{
