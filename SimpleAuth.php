@@ -3,7 +3,7 @@
 /*
 __PocketMine Plugin__
 name=SimpleAuth
-description=Prevents people to impersonate an account, requering registration and login when connecting.
+description=Prevents people to impersonate an account, requiring registration and login when connecting.
 version=0.1
 author=shoghicp
 class=SimpleAuth
