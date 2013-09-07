@@ -192,15 +192,15 @@ class SimpleAuth implements Plugin{
 					if($data["cmd"] === "login" and $this->checkLogin($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$this->login($data["issuer"]);
 						return true;
-					}elseif($data["cmd"] === "login" or $data["cmd"] === "register"){
-						$data["issuer"]->sendChat("[SimpleAuth] Error during authentication.");
-						return true;
-					}elseif(strlen(implode(" ", $data["parameters"])) < 6){
+					}elseif($data["cmd"] === "register" and strlen(implode(" ", $data["parameters"])) < 6){
 						$data["issuer"]->sendChat("[SimpleAuth] Password is too short.");
 						return true;
 					}elseif($this->config->get("allowRegister") !== false and $data["cmd"] === "register" and $this->register($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$data["issuer"]->sendChat("[SimpleAuth] You've been sucesfully registered.");
 						$this->login($data["issuer"]);
+						return true;
+					}elseif($data["cmd"] === "login" or $data["cmd"] === "register"){
+						$data["issuer"]->sendChat("[SimpleAuth] Error during authentication.");
 						return true;
 					}
 					return false;
