@@ -4,10 +4,23 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.1
+version=0.2
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10
+*/
+
+/*
+
+Changelog:
+
+0.2:
+* Refuse short passwords
+* Added simpleauth.login, simpleauth.register, simpleauth.logout handler events
+
+0.1:
+* Initial release
+
 */
 
 class SimpleAuth implements Plugin{
@@ -119,12 +132,14 @@ class SimpleAuth implements Plugin{
 		$this->sessions[$player->CID] = true;
 		$player->blocked = false;
 		$player->sendChat("[SimpleAuth] You've been authenticated.");
+		$this->server->handle("simpleauth.login", $player);
 		return true;
 	}
 	
 	public function logout(Player $player){
 		$this->sessions[$player->CID] = time();
 		$player->blocked = true;
+		$this->server->handle("simpleauth.logout", $player);
 	}
 	
 	public function register(Player $player, $password){	
@@ -137,6 +152,7 @@ class SimpleAuth implements Plugin{
 			);
 			$this->playerFile->set($player->iusername, $data);
 			$this->playerFile->save();
+			$this->server->handle("simpleauth.register", $player);
 			return true;
 		}
 		return false;
@@ -173,15 +189,18 @@ class SimpleAuth implements Plugin{
 				break;
 			case "console.command":
 				if(($data["issuer"] instanceof Player) and $this->sessions[$data["issuer"]->CID] !== true){
-					if($this->config->get("allowRegister") !== false and $data["cmd"] === "login" and $this->checkLogin($data["issuer"], implode(" ", $data["parameters"])) === true){
+					if($data["cmd"] === "login" and $this->checkLogin($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$this->login($data["issuer"]);
+						return true;
+					}elseif($data["cmd"] === "login" or $data["cmd"] === "register"){
+						$data["issuer"]->sendChat("[SimpleAuth] Error during authentication.");
+						return true;
+					}elseif(strlen(implode(" ", $data["parameters"])) < 6){
+						$data["issuer"]->sendChat("[SimpleAuth] Password is too short.");
 						return true;
 					}elseif($this->config->get("allowRegister") !== false and $data["cmd"] === "register" and $this->register($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$data["issuer"]->sendChat("[SimpleAuth] You've been sucesfully registered.");
 						$this->login($data["issuer"]);
-						return true;
-					}elseif($this->config->get("allowRegister") !== false and $data["cmd"] === "login" or $data["cmd"] === "register"){
-						$data["issuer"]->sendChat("[SimpleAuth] Error during authentication.");
 						return true;
 					}
 					return false;
