@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.2
+version=0.3
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10
@@ -37,6 +37,7 @@ class SimpleAuth implements Plugin{
 			"allowChat" => false,
 			"messageInterval" => 5,
 			"timeout" => 60,
+			"authByIp" => true,
 			"allowRegister" => true,
 			"forceSingleSession" => true,
 		));
@@ -99,7 +100,8 @@ class SimpleAuth implements Plugin{
 					if($d === false){					
 						$this->server->clients[$CID]->sendChat("[SimpleAuth] You must register using /register <password>");
 					}else{
-						$this->server->clients[$CID]->sendChat("[SimpleAuth] You must authenticate using /login <password>");
+						if($d['lastip']==$this->server->clients[$CID]->ip && $this->config->get('authByIp')===true) { $this->login($this->server->clients[$CID]); }
+						else { $this->server->clients[$CID]->sendChat("[SimpleAuth] You must authenticate using /login <password>"); }
 					}
 				}
 				if($timeout !== false and ($timer + $timeout) <= time()){
@@ -126,6 +128,7 @@ class SimpleAuth implements Plugin{
 		$d = $this->playerFile->get($player->iusername);
 		if($d !== false){
 			$d["logindate"] = time();
+			$d["lastip"] = $player->ip; 
 			$this->playerFile->set($player->iusername, $d);
 			$this->playerFile->save();
 		}
@@ -182,7 +185,8 @@ class SimpleAuth implements Plugin{
 						if($d === false){					
 							$data->sendChat("[SimpleAuth] You must register using /register <password>");
 						}else{
-							$data->sendChat("[SimpleAuth] You must authenticate using /login <password>");
+							if($d['lastip']==$data->ip && $this->config->get('authByIp')===true) { $this->login($data); }
+							else { $data->sendChat("[SimpleAuth] You must authenticate using /login <password>"); }
 						}
 					}
 				}
