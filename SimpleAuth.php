@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.2
+version=0.3
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10
