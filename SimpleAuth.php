@@ -4,15 +4,19 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.2
+version=0.3
 author=shoghicp
 class=SimpleAuth
-apiversion=9,10
+apiversion=9,10,11
 */
 
 /*
 
 Changelog:
+
+0.3:
+* Optimized performance
+* Added admin commands
 
 0.2:
 * Refuse short passwords
@@ -36,11 +40,20 @@ class SimpleAuth implements Plugin{
 		$this->config = new Config($this->api->plugin->configPath($this)."config.yml", CONFIG_YAML, array(
 			"allowChat" => false,
 			"messageInterval" => 5,
-			"timeout" => 60,
+			"timeout" => 120,
 			"allowRegister" => true,
 			"forceSingleSession" => true,
 		));
-		$this->playerFile = new Config($this->api->plugin->configPath($this)."players.yml", CONFIG_YAML, array());
+		@mkdir($this->api->plugin->configPath($this)."players/");
+		if(file_exists($this->api->plugin->configPath($this)."players.yml")){			
+			$playerFile = new Config($this->api->plugin->configPath($this)."players.yml", CONFIG_YAML, array());
+			console("[INFO] [SimpleAuth] Importing old format to new format...");
+			foreach($playerFile->getAll() as $k => $value){
+				$d = new Config($this->api->plugin->configPath($this)."players/".$k.".yml", CONFIG_YAML, $value);
+				$d->save();
+			}
+			@unlink($this->api->plugin->configPath($this)."players.yml");
+		}
 		
 		$this->api->addHandler("player.quit", array($this, "eventHandler"), 50);
 		$this->api->addHandler("player.connect", array($this, "eventHandler"), 50);
@@ -50,14 +63,44 @@ class SimpleAuth implements Plugin{
 		$this->api->addHandler("console.command", array($this, "eventHandler"), 50);
 		$this->api->addHandler("op.check", array($this, "eventHandler"), 50);
 		$this->api->schedule(20, array($this, "checkTimer"), array(), true);
-		$this->api->console->register("unregister", "<password>", array($this, "commandHandler"));
+		$this->api->console->register("unregister", "<password>", array($this, "commandHandler"));		
 		$this->api->ban->cmdWhitelist("unregister");
+
+		$this->api->console->register("simpleauth", "<command> [parameters...]", array($this, "commandHandler"));
 		console("[INFO] SimpleAuth enabled!");
+	}
+	
+	public function getData($iusername){
+		$iusername = strtolower($iusername);
+		if(!file_exists($this->api->plugin->configPath($this)."players/$iusername.yml")){
+			return false;
+		}
+		return new Config($this->api->plugin->configPath($this)."players/$iusername.yml", CONFIG_YAML, array());
 	}
 	
 	public function commandHandler($cmd, $params, $issuer, $alias){
 		$output = "";
 		switch($cmd){
+			case "simpleauth":
+				if(!isset($params[0])){
+					$output .= "Usage: /simpleauth <command> [parameters...]\n";
+					$output .= "Available commands: help, unregister\n";
+				}
+				switch(strtolower(array_shift($params[0]))){
+					case "unregister":
+						if(($player = $this->api->player->get($params[0])) instanceof Player){						
+							@unlink($this->api->plugin->configPath($this)."players/".$player->iusername.".yml");
+							$this->logout($player);
+						}else{
+							@unlink($this->api->plugin->configPath($this)."players/".strtolower($params[0]).".yml");
+						}
+						break;
+					case "help":
+					default:
+						$output .= "/simpleauth help: Shows this information.\n";
+						$output .= "/simpleauth unregister <player>: Removes the player from the database.\n";
+				}
+				break;
 			case "unregister":
 				if(!($issuer instanceof Player)){
 					$output .= "Please run this command inside the game.\n";
@@ -67,9 +110,9 @@ class SimpleAuth implements Plugin{
 					$output .= "Please login first.\n";
 					break;
 				}
-				$d = $this->playerFile->get($issuer->iusername);
+				$d = $this->getData($issuer->iusername);
 				if($d !== false and $d["hash"] === $this->hash($issuer->iusername, implode(" ", $params))){
-					$this->playerFile->remove($issuer->iusername);
+					unlink($this->api->plugin->configPath($this)."players/".strtolower($issuer->iusername).".yml");
 					$this->logout($issuer);
 					$output .= "[SimpleAuth] Unregistered correctly.\n";
 				}else{
@@ -95,7 +138,7 @@ class SimpleAuth implements Plugin{
 		foreach($this->sessions as $CID => $timer){
 			if($timer !== true and $timer !== false){				
 				if($broadcast === true){
-					$d = $this->playerFile->get($this->server->clients[$CID]->iusername);
+					$d = $this->getData($this->server->clients[$CID]->iusername);
 					if($d === false){					
 						$this->server->clients[$CID]->sendChat("[SimpleAuth] You must register using /register <password>");
 					}else{
@@ -111,11 +154,11 @@ class SimpleAuth implements Plugin{
 	}
 	
 	private function hash($salt, $password){
-		return Utils::strToHex(hash("sha512", $password . $salt, true) ^ hash("whirlpool", $salt . $password, true));
+		return bin2hex(hash("sha512", $password . $salt, true) ^ hash("whirlpool", $salt . $password, true));
 	}
 	
 	public function checkLogin(Player $player, $password){
-		$d = $this->playerFile->get($player->iusername);
+		$d = $this->getData($player->iusername);
 		if($d !== false and $d["hash"] === $this->hash($player->iusername, $password)){
 			return true;
 		}
@@ -123,11 +166,10 @@ class SimpleAuth implements Plugin{
 	}
 	
 	public function login(Player $player){
-		$d = $this->playerFile->get($player->iusername);
+		$d = $this->getData($player->iusername);
 		if($d !== false){
-			$d["logindate"] = time();
-			$this->playerFile->set($player->iusername, $d);
-			$this->playerFile->save();
+			$d->set("logindate", time());
+			$d->save();
 		}
 		$this->sessions[$player->CID] = true;
 		$player->blocked = false;
@@ -143,15 +185,13 @@ class SimpleAuth implements Plugin{
 	}
 	
 	public function register(Player $player, $password){	
-		$d = $this->playerFile->get($player->iusername);
+		$d = $this->getData($player->iusername);
 		if($d === false){
-			$data = array(
-				"registerdate" => time(),
-				"logindate" => time(),
-				"hash" => $this->hash($player->iusername, $password),
-			);
-			$this->playerFile->set($player->iusername, $data);
-			$this->playerFile->save();
+			$d = new Config($this->api->plugin->configPath($this)."players/".$player->iusername.".yml", CONFIG_YAML, array());
+			$d->set("registerdate", time());
+			$d->set("logindate", time());
+			$d->set("hash", $this->hash($player->iusername, $password));
+			$d->save();
 			$this->server->handle("simpleauth.register", $player);
 			return true;
 		}
@@ -165,7 +205,7 @@ class SimpleAuth implements Plugin{
 				break;
 			case "player.connect":
 				if($this->config->get("forceSingleSession") === true){
-					$p = $this->api->player->get($data->iusername);
+					$p = $this->getData($data->iusername);
 					if(($p instanceof Player) and $p->iusername === $data->iusername){
 						return false;
 					}
@@ -178,7 +218,7 @@ class SimpleAuth implements Plugin{
 					$data->blocked = true;
 					$data->sendChat("[SimpleAuth] This server uses SimpleAuth to protect your account.");
 					if($this->config->get("allowRegister") !== false){
-						$d = $this->playerFile->get($data->iusername);
+						$d = $this->getData($data->iusername);
 						if($d === false){					
 							$data->sendChat("[SimpleAuth] You must register using /register <password>");
 						}else{
@@ -227,7 +267,6 @@ class SimpleAuth implements Plugin{
 	
 	public function __destruct(){
 		$this->config->save();
-		$this->playerFile->save();
 	}
 
 }
