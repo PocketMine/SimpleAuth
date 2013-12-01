@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3
+version=0.3.1
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,9 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.1
+* Added folder per letter
 
 0.3:
 * Optimized performance
@@ -49,7 +52,8 @@ class SimpleAuth implements Plugin{
 			$playerFile = new Config($this->api->plugin->configPath($this)."players.yml", CONFIG_YAML, array());
 			console("[INFO] [SimpleAuth] Importing old format to new format...");
 			foreach($playerFile->getAll() as $k => $value){
-				$d = new Config($this->api->plugin->configPath($this)."players/".$k.".yml", CONFIG_YAML, $value);
+				@mkdir($this->api->plugin->configPath($this)."players/".$k{0}."/");
+				$d = new Config($this->api->plugin->configPath($this)."players/".$k{0}."/".$k.".yml", CONFIG_YAML, $value);
 				$d->save();
 			}
 			@unlink($this->api->plugin->configPath($this)."players.yml");
@@ -72,10 +76,10 @@ class SimpleAuth implements Plugin{
 	
 	public function getData($iusername){
 		$iusername = strtolower($iusername);
-		if(!file_exists($this->api->plugin->configPath($this)."players/$iusername.yml")){
+		if(!file_exists($this->api->plugin->configPath($this)."players/".$iusername{0}."/$iusername.yml")){
 			return false;
 		}
-		return new Config($this->api->plugin->configPath($this)."players/$iusername.yml", CONFIG_YAML, array());
+		return new Config($this->api->plugin->configPath($this)."players/".$iusername{0}."/$iusername.yml", CONFIG_YAML, array());
 	}
 	
 	public function commandHandler($cmd, $params, $issuer, $alias){
@@ -89,10 +93,10 @@ class SimpleAuth implements Plugin{
 				switch(strtolower(array_shift($params[0]))){
 					case "unregister":
 						if(($player = $this->api->player->get($params[0])) instanceof Player){						
-							@unlink($this->api->plugin->configPath($this)."players/".$player->iusername.".yml");
+							@unlink($this->api->plugin->configPath($this)."players/".$player->iusername{0}."/".$player->iusername.".yml");
 							$this->logout($player);
 						}else{
-							@unlink($this->api->plugin->configPath($this)."players/".strtolower($params[0]).".yml");
+							@unlink($this->api->plugin->configPath($this)."players/".substr(strtolower($params{0}), 0, 1)."/".strtolower($params[0]).".yml");
 						}
 						break;
 					case "help":
@@ -112,7 +116,7 @@ class SimpleAuth implements Plugin{
 				}
 				$d = $this->getData($issuer->iusername);
 				if($d !== false and $d["hash"] === $this->hash($issuer->iusername, implode(" ", $params))){
-					unlink($this->api->plugin->configPath($this)."players/".strtolower($issuer->iusername).".yml");
+					unlink($this->api->plugin->configPath($this)."players/".$issuer->iusername{0}."/".$issuer->iusername.".yml");
 					$this->logout($issuer);
 					$output .= "[SimpleAuth] Unregistered correctly.\n";
 				}else{
@@ -187,7 +191,8 @@ class SimpleAuth implements Plugin{
 	public function register(Player $player, $password){	
 		$d = $this->getData($player->iusername);
 		if($d === false){
-			$d = new Config($this->api->plugin->configPath($this)."players/".$player->iusername.".yml", CONFIG_YAML, array());
+			@mkdir($this->api->plugin->configPath($this)."players/".$player->iusername{0}."/");
+			$d = new Config($this->api->plugin->configPath($this)."players/".$player->iusername{0}."/".$player->iusername.".yml", CONFIG_YAML, array());
 			$d->set("registerdate", time());
 			$d->set("logindate", time());
 			$d->set("hash", $this->hash($player->iusername, $password));
