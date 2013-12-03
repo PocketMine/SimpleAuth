@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3.1
+version=0.3.2
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,10 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.2
+* Fixed a few bugs
+* Added min. password length in the config
 
 0.3.1
 * Added folder per letter
@@ -46,6 +50,7 @@ class SimpleAuth implements Plugin{
 			"timeout" => 120,
 			"allowRegister" => true,
 			"forceSingleSession" => true,
+			"minPasswordLength" => 6,
 		));
 		@mkdir($this->api->plugin->configPath($this)."players/");
 		if(file_exists($this->api->plugin->configPath($this)."players.yml")){			
@@ -90,7 +95,7 @@ class SimpleAuth implements Plugin{
 					$output .= "Usage: /simpleauth <command> [parameters...]\n";
 					$output .= "Available commands: help, unregister\n";
 				}
-				switch(strtolower(array_shift($params[0]))){
+				switch(strtolower(array_shift($params))){
 					case "unregister":
 						if(($player = $this->api->player->get($params[0])) instanceof Player){						
 							@unlink($this->api->plugin->configPath($this)."players/".$player->iusername{0}."/".$player->iusername.".yml");
@@ -115,7 +120,7 @@ class SimpleAuth implements Plugin{
 					break;
 				}
 				$d = $this->getData($issuer->iusername);
-				if($d !== false and $d["hash"] === $this->hash($issuer->iusername, implode(" ", $params))){
+				if($d !== false and $d->get("hash") === $this->hash($issuer->iusername, implode(" ", $params))){
 					unlink($this->api->plugin->configPath($this)."players/".$issuer->iusername{0}."/".$issuer->iusername.".yml");
 					$this->logout($issuer);
 					$output .= "[SimpleAuth] Unregistered correctly.\n";
@@ -163,7 +168,7 @@ class SimpleAuth implements Plugin{
 	
 	public function checkLogin(Player $player, $password){
 		$d = $this->getData($player->iusername);
-		if($d !== false and $d["hash"] === $this->hash($player->iusername, $password)){
+		if($d !== false and $d->get("hash") === $this->hash($player->iusername, $password)){
 			return true;
 		}
 		return false;
@@ -237,7 +242,7 @@ class SimpleAuth implements Plugin{
 					if($data["cmd"] === "login" and $this->checkLogin($data["issuer"], implode(" ", $data["parameters"])) === true){
 						$this->login($data["issuer"]);
 						return true;
-					}elseif($data["cmd"] === "register" and strlen(implode(" ", $data["parameters"])) < 6){
+					}elseif($data["cmd"] === "register" and strlen(implode(" ", $data["parameters"])) < $this->config->get("minPasswordLength")){
 						$data["issuer"]->sendChat("[SimpleAuth] Password is too short.");
 						return true;
 					}elseif($this->config->get("allowRegister") !== false and $data["cmd"] === "register" and $this->register($data["issuer"], implode(" ", $data["parameters"])) === true){
