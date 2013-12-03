@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3.3
+version=0.3.4
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,9 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.4
+* Fixed bug when using authentication by IP
 
 0.3.3
 * Authentication by last IP (optional)
@@ -238,7 +241,7 @@ class SimpleAuth implements Plugin{
 					$data->sendChat("[SimpleAuth] This server uses SimpleAuth to protect your account.");
 					if($this->config->get("allowRegister") !== false){
 						$d = $this->getData($data->iusername);
-						if($this->config->get("authenticateByLastIP") === true and $d->get("lastip") == $data->ip){
+						if($this->config->get("authenticateByLastIP") === true and ($d instanceof Config) and $d->get("lastip") == $data->ip){
 							$this->login($data);
 							break;
 						}
