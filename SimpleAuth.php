@@ -273,6 +273,7 @@ class SimpleAuth implements Plugin{
 				}
 				break;
 		}
+		return;
 	}
 	
 	public function __destruct(){
