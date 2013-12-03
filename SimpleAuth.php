@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3.2
+version=0.3.3
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,10 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.3
+* Authentication by last IP (optional)
+* Players won't be harmed during login/register
 
 0.3.2
 * Fixed a few bugs
@@ -71,6 +75,7 @@ class SimpleAuth implements Plugin{
 		$this->api->addHandler("player.chat", array($this, "eventHandler"), 50);
 		$this->api->addHandler("console.command", array($this, "eventHandler"), 50);
 		$this->api->addHandler("op.check", array($this, "eventHandler"), 50);
+		$this->api->addHandler("entity.health.change", array($this, "eventHandler"), 50);
 		$this->api->schedule(20, array($this, "checkTimer"), array(), true);
 		$this->api->console->register("unregister", "<password>", array($this, "commandHandler"));		
 		$this->api->ban->cmdWhitelist("unregister");
@@ -182,6 +187,7 @@ class SimpleAuth implements Plugin{
 		}
 		$this->sessions[$player->CID] = true;
 		$player->blocked = false;
+		$player->entity->setHealth($player->entity->health, "generic");
 		$player->sendChat("[SimpleAuth] You've been authenticated.");
 		$this->server->handle("simpleauth.login", $player);
 		return true;
@@ -235,6 +241,11 @@ class SimpleAuth implements Plugin{
 							$data->sendChat("[SimpleAuth] You must authenticate using /login <password>");
 						}
 					}
+				}
+				break;
+			case "entity.health.change":
+				if(($data["entity"]->player instanceof Player) and $this->sessions[$data["entity"]->player->CID] !== true){
+					return false;
 				}
 				break;
 			case "console.command":
