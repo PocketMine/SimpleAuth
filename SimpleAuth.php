@@ -55,6 +55,7 @@ class SimpleAuth implements Plugin{
 			"allowRegister" => true,
 			"forceSingleSession" => true,
 			"minPasswordLength" => 6,
+			"authenticateByLastIP" => false,
 		));
 		@mkdir($this->api->plugin->configPath($this)."players/");
 		if(file_exists($this->api->plugin->configPath($this)."players.yml")){			
@@ -183,6 +184,7 @@ class SimpleAuth implements Plugin{
 		$d = $this->getData($player->iusername);
 		if($d !== false){
 			$d->set("logindate", time());
+			$d->set("lastip", $player->ip);
 			$d->save();
 		}
 		$this->sessions[$player->CID] = true;
@@ -206,6 +208,7 @@ class SimpleAuth implements Plugin{
 			$d = new Config($this->api->plugin->configPath($this)."players/".$player->iusername{0}."/".$player->iusername.".yml", CONFIG_YAML, array());
 			$d->set("registerdate", time());
 			$d->set("logindate", time());
+			$d->set("lastip", $player->ip);
 			$d->set("hash", $this->hash($player->iusername, $password));
 			$d->save();
 			$this->server->handle("simpleauth.register", $player);
@@ -220,8 +223,8 @@ class SimpleAuth implements Plugin{
 				unset($this->sessions[$data->CID]);
 				break;
 			case "player.connect":
+				$p = $this->api->player->get($data->iusername);
 				if($this->config->get("forceSingleSession") === true){
-					$p = $this->getData($data->iusername);
 					if(($p instanceof Player) and $p->iusername === $data->iusername){
 						return false;
 					}
@@ -235,6 +238,10 @@ class SimpleAuth implements Plugin{
 					$data->sendChat("[SimpleAuth] This server uses SimpleAuth to protect your account.");
 					if($this->config->get("allowRegister") !== false){
 						$d = $this->getData($data->iusername);
+						if($this->config->get("authenticateByLastIP") === true and $d->get("lastip") == $data->ip){
+							$this->login($data);
+							break;
+						}
 						if($d === false){					
 							$data->sendChat("[SimpleAuth] You must register using /register <password>");
 						}else{
