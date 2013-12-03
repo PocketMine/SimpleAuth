@@ -9,6 +9,8 @@ Plugin for PocketMine-MP that prevents people to impersonate an account, requeri
 * `/login <password>`
 * `/register <password>`
 * `/unregister <password>`
+* For OPs: `/simpleauth <command: help|unregister> [parameters...]`
+
 
 ## Configuration
 
@@ -21,6 +23,7 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 | timeout | integer | 60 | Unauthenticated players will be kicked after this period of time. Set it to 0 to disable. |
 | allowRegister | boolean | true | Allows registering and log in through commands. |
 | forceSingleSession | boolean | true | New players won't kick an authenticated player if using the same name. |
+| minPasswordLength | integer | 6 | Minimum length of the register password. |
 
 
 ## For developers
