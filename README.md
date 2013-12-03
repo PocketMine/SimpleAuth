@@ -24,6 +24,7 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 | allowRegister | boolean | true | Allows registering and log in through commands. |
 | forceSingleSession | boolean | true | New players won't kick an authenticated player if using the same name. |
 | minPasswordLength | integer | 6 | Minimum length of the register password. |
+| authenticateByLastIP | boolean | false | Enables authentication by last IP. |
 
 
 ## For developers
