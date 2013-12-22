@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3.5
+version=0.3.6
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,9 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.6
+* Extended latest crash fix
 
 0.3.5
 * Fixed crash caused by a race condition
@@ -157,8 +160,8 @@ class SimpleAuth implements Plugin{
 		}
 		
 		foreach($this->sessions as $CID => $timer){
-			if($timer !== true and $timer !== false){				
-				if(isset($this->server->clients[$CID]) and ($this->server->clients[$CID] instanceof Player) and $broadcast === true){
+			if($timer !== true and $timer !== false and isset($this->server->clients[$CID]) and ($this->server->clients[$CID] instanceof Player)){				
+				if($broadcast === true){
 					$d = $this->getData($this->server->clients[$CID]->iusername);
 					if($d === false){					
 						$this->server->clients[$CID]->sendChat("[SimpleAuth] You must register using /register <password>");
