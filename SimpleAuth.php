@@ -89,6 +89,8 @@ class SimpleAuth implements Plugin{
 		$this->api->schedule(20, array($this, "checkTimer"), array(), true);
 		$this->api->console->register("unregister", "<password>", array($this, "commandHandler"));		
 		$this->api->ban->cmdWhitelist("unregister");
+                $this->api->console->alias("r", "register", array($this, "handleCommand"));
+                $this->api->console->alias("l", "login", array($this, "handleCommand"));
 
 		$this->api->console->register("simpleauth", "<command> [parameters...]", array($this, "commandHandler"));
 		console("[INFO] SimpleAuth enabled!");
