@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3.6
+version=0.3.7
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,9 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.7
+* Added single session kick reason
 
 0.3.6
 * Extended latest crash fix
@@ -235,6 +238,7 @@ class SimpleAuth implements Plugin{
 				$p = $this->api->player->get($data->iusername);
 				if($this->config->get("forceSingleSession") === true){
 					if(($p instanceof Player) and $p->iusername === $data->iusername){
+						$p->close("player already connected", false);
 						return false;
 					}
 				}
