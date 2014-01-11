@@ -4,7 +4,7 @@
 __PocketMine Plugin__
 name=SimpleAuth
 description=Prevents people to impersonate an account, requiring registration and login when connecting.
-version=0.3.7
+version=0.3.8
 author=shoghicp
 class=SimpleAuth
 apiversion=9,10,11
@@ -13,6 +13,9 @@ apiversion=9,10,11
 /*
 
 Changelog:
+
+0.3.8
+* Hopefully fixed undefined indexes errors
 
 0.3.7
 * Added single session kick reason
@@ -236,16 +239,17 @@ class SimpleAuth implements Plugin{
 				break;
 			case "player.connect":
 				$p = $this->api->player->get($data->iusername);
+				$this->sessions[$data->CID] = false;
 				if($this->config->get("forceSingleSession") === true){
 					if(($p instanceof Player) and $p->iusername === $data->iusername){
 						$p->close("player already connected", false);
+						unset($this->sessions[$data->CID]);
 						return false;
 					}
 				}
-				$this->sessions[$data->CID] = false;
 				break;
 			case "player.spawn":
-				if($this->sessions[$data->CID] !== true){
+				if(!isset($this->sessions[$data->CID]) or $this->sessions[$data->CID] !== true){
 					$this->sessions[$data->CID] = time();
 					$data->blocked = true;
 					$data->sendChat("[SimpleAuth] This server uses SimpleAuth to protect your account.");
@@ -264,7 +268,7 @@ class SimpleAuth implements Plugin{
 				}
 				break;
 			case "entity.health.change":
-				if(($data["entity"]->player instanceof Player) and $this->sessions[$data["entity"]->player->CID] !== true){
+				if(($data["entity"]->player instanceof Player) and (!isset($this->sessions[$data["entity"]->player->CID]) or $this->sessions[$data["entity"]->player->CID] !== true)){
 					return false;
 				}
 				break;
@@ -294,12 +298,12 @@ class SimpleAuth implements Plugin{
 				break;
 			case "op.check":
 				$p = $this->api->player->get($data);
-				if(($p instanceof Player) and $this->sessions[$p->CID] !== true){
+				if(($p instanceof Player) and (!isset($this->sessions[$p->CID]) or $this->sessions[$p->CID] !== true)){
 					return false;
 				}
 				break;
 			case "player.respawn":
-				if($this->sessions[$data->CID] !== true){
+				if(!isset($this->sessions[$data->CID]) or $this->sessions[$data->CID] !== true){
 					$data->blocked = true;
 				}
 				break;
