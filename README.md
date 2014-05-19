@@ -1,6 +1,6 @@
 # SimpleAuth
 
-Plugin for PocketMine-MP that prevents people to impersonate an account, requering registration and login when connecting.
+Plugin for PocketMine-MP that prevents people to impersonate an account, requiring registration and login when connecting.
 
 
 ## Commands
