@@ -96,6 +96,10 @@ class SimpleAuth extends PluginBase{
 
 	/* -------------------------- Non-API part -------------------------- */
 
+	public function closePlayer(Player $player){
+		unset($this->needAuth[spl_object_hash($player)]);
+	}
+
 	public function sendAuthenticateMessage(Player $player){
 		//TODO: multilang (when implemented in PocketMine-MP)
 		$config = $this->getPlayer($player->getName());
@@ -130,10 +134,6 @@ class SimpleAuth extends PluginBase{
 
 	public function onDisable(){
 		$this->saveConfig();
-	}
-
-	public function closePlayer(Player $player){
-		unset($this->needAuth[spl_object_hash($player)]);
 	}
 
 	/**

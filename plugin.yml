@@ -1,0 +1,22 @@
+name: SimpleAuth
+main: SimpleAuth\SimpleAuth
+version: 1.0.0
+api: [1.0.0]
+load: STARTUP
+author: PocketMine Team
+authors: [shoghicp]
+description: Prevents people from impersonate an account, requering registration and login when connecting.
+website: https://github.com/PocketMine/SimpleAuth
+commands:
+
+permissions:
+ simpleauth:
+  default: op
+  description: "Allows using everything SimpleAuth has"
+  children:
+   simpleauth.chat:
+    description: "Allows using the chat while not being authenticated"
+    default: false
+   simpleauth.move:
+    description: "Allows moving while not being authenticated"
+    default: false
