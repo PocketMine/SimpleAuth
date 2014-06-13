@@ -1,0 +1,25 @@
+# Default config for SimpleAuth plugin
+
+#Allows registering new accounts by players.
+#If disabled, you can still register new accouts using other plugins.
+allowRegister: true
+
+#If enabled, existing logged-in accounts won't be kicked if a new player joins with the same name
+#TODO: Add permission
+forceSingleSession: true
+
+#Sets the minimum amount of characters to be used when registering a new account
+minPasswordLength: 6
+
+#If enabled, accounts that are using the same IP when logging in again will be automatically authenticated
+#TODO: Add permission
+authenticateByLastIP: false
+
+#Number of seconds to wait for a player to be authenticated. If false, disables the timeout
+authenticateTimeout: 120
+
+#Interval that players will be asked to authenticate
+messageInterval: 15
+
+#TODO: Make this a permission (guest)
+allowChat: true
