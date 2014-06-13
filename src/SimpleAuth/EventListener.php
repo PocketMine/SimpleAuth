@@ -69,7 +69,13 @@ class EventListener implements Listener{
 			$message = $event->getMessage();
 			if($message{0} === "/"){ //Command
 				$event->setCancelled(true);
-				//TODO: parse special commands
+				$command = substr($message, 1);
+				$args = explode(" ", $command);
+				if($args[0] === "register" or $args[0] === "login" or $args[0] === "help"){
+					$this->plugin->getServer()->dispatchCommand($event->getPlayer(), $command);
+				}else{
+					$this->plugin->sendAuthenticateMessage($event->getPlayer());
+				}
 			}elseif(!$event->getPlayer()->hasPermission("simpleauth.chat")){
 				$event->setCancelled(true);
 			}

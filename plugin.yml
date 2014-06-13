@@ -8,6 +8,14 @@ authors: [shoghicp]
 description: Prevents people from impersonate an account, requering registration and login when connecting.
 website: https://github.com/PocketMine/SimpleAuth
 commands:
+ login:
+  description: "Logs into an account"
+  usage: "/login <password>"
+  permission: simpleauth.command.login
+ register:
+  description: "Registers an account"
+  usage: "/register <password>"
+  permission: simpleauth.command.register
 
 permissions:
  simpleauth:
@@ -20,3 +28,13 @@ permissions:
    simpleauth.move:
     description: "Allows moving while not being authenticated"
     default: false
+   simpleauth.command:
+    description: "Allows using SimpleAuth commands"
+    default: true
+    children:
+     simpleauth.command.register:
+      description: "Allows registering an account"
+      default: true
+     simpleauth.command.login:
+      description: "Allows logging into an account"
+      default: true

@@ -17,10 +17,15 @@
 
 namespace SimpleAuth;
 
+use pocketmine\command\Command;
+use pocketmine\command\CommandSender;
+use pocketmine\IPlayer;
+use pocketmine\OfflinePlayer;
 use pocketmine\permission\PermissionAttachment;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
+use pocketmine\utils\TextFormat;
 use SimpleAuth\event\PlayerAuthenticateEvent;
 use SimpleAuth\event\PlayerDeauthenticateEvent;
 
@@ -41,6 +46,10 @@ class SimpleAuth extends PluginBase{
 	 */
 	public function isPlayerAuthenticated(Player $player){
 		return !isset($this->needAuth[spl_object_hash($player)]);
+	}
+
+	public function isPlayerRegistered(IPlayer $player){
+		return $this->getPlayer($player->getName()) instanceof Config;
 	}
 
 	/**
@@ -111,6 +120,39 @@ class SimpleAuth extends PluginBase{
 		}
 	}
 
+	public function onCommand(CommandSender $sender, Command $command, $label, array $args){
+		switch($command->getName()){
+			case "login":
+				if($sender instanceof Player){
+					if(!$this->isPlayerRegistered($sender)){
+						$sender->sendMessage(TextFormat::RED . "This account is not registered.");
+						return true;
+					}
+
+					//TODO: log in logic
+				}else{
+					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+					return true;
+				}
+				break;
+			case "register":
+				if($sender instanceof Player){
+					if($this->isPlayerRegistered($sender)){
+						$sender->sendMessage(TextFormat::RED . "This account is already registered.");
+						return true;
+					}
+
+					//TODO: register login
+				}else{
+					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+					return true;
+				}
+				break;
+		}
+
+		return false;
+	}
+
 	public function onEnable(){
 		$this->saveDefaultConfig();
 		$this->reloadConfig();
@@ -130,6 +172,11 @@ class SimpleAuth extends PluginBase{
 
 	protected function removePermissions(PermissionAttachment $attachment){
 		$attachment->setPermission("pocketmine", false);
+		$attachment->setPermission("pocketmine.command.help", true);
+
+		//Do this because of permision manager plugins
+		$attachment->setPermission("simpleauth.command.login", true);
+		$attachment->setPermission("simpleauth.command.register", true);
 	}
 
 	public function onDisable(){
