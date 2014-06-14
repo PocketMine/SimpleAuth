@@ -305,9 +305,19 @@ class SimpleAuth extends PluginBase{
 		$attachment->setPermission("pocketmine", false);
 		$attachment->setPermission("pocketmine.command.help", true);
 
-		//Do this because of permision manager plugins
-		$attachment->setPermission("simpleauth.command.login", true);
-		$attachment->setPermission("simpleauth.command.register", true);
+		//Do this because of permission manager plugins
+		if($this->getConfig()->get("disableRegister") === true){
+			$attachment->setPermission("simpleauth.command.register", false);
+		}else{
+			$attachment->setPermission("simpleauth.command.register", true);
+		}
+
+		if($this->getConfig()->get("disableLogin") === true){
+			$attachment->setPermission("simpleauth.command.login", false);
+		}else{
+			$attachment->setPermission("simpleauth.command.login", true);
+		}
+
 	}
 
 	/**

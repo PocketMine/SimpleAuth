@@ -28,6 +28,9 @@ permissions:
    simpleauth.move:
     description: "Allows moving while not being authenticated"
     default: false
+   simpleauth.lastip:
+    description: "Allows authenticating using the lastIP when enabled in the config"
+    default: notop
    simpleauth.command:
     description: "Allows using SimpleAuth commands"
     default: true

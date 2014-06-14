@@ -21,8 +21,13 @@ forceSingleSession: true
 minPasswordLength: 6
 
 #If enabled, accounts that are using the same IP when logging in again will be automatically authenticated
-#TODO: Add permission
 authenticateByLastIP: false
+
+#If enabled, will set all the permissions for simleauth.command.register to false
+disableRegister: false
+
+#If enabled, will set all the permissions for simleauth.command.login to false
+disableLogin: false
 
 #Number of seconds to wait for a player to be authenticated. If false, disables the timeout
 #TODO
