@@ -8,6 +8,7 @@ allowRegister: true
 #Only use none when there is another plugin that will integrate its dataProvider with SimpleAuth
 #Be aware that data is not automatically moved between data providers.
 dataProvider: yaml
+#For MySQL: [host: "127.0.0.1", port: 3306, user: "user", password: "password", database: "databaseName"]
 dataProviderSettings: []
 
 #If enabled, existing logged-in accounts won't be kicked if a new player joins with the same name

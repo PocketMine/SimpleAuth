@@ -30,6 +30,7 @@ use SimpleAuth\event\PlayerRegisterEvent;
 use SimpleAuth\event\PlayerUnregisterEvent;
 use SimpleAuth\provider\DataProvider;
 use SimpleAuth\provider\DummyDataProvider;
+use SimpleAuth\provider\MySQLDataProvider;
 use SimpleAuth\provider\SQLite3DataProvider;
 use SimpleAuth\provider\YAMLDataProvider;
 
@@ -262,7 +263,9 @@ class SimpleAuth extends PluginBase{
 				$this->provider = new SQLite3DataProvider($this);
 				break;
 			case "mysql":
-				//TODO
+				$this->getLogger()->debug("Using MySQL data provider");
+				$this->provider = new MySQLDataProvider($this);
+				break;
 			case "none":
 			default:
 				$this->provider = new DummyDataProvider($this);
@@ -302,7 +305,7 @@ class SimpleAuth extends PluginBase{
 	 * @param string $salt
 	 * @param string $password
 	 *
-	 * @return string[1024] hex 512-bit hash
+	 * @return string[128] hex 512-bit hash
 	 */
 	private function hash($salt, $password){
 		return bin2hex(hash("sha512", $password . $salt, true) ^ hash("whirlpool", $salt . $password, true));

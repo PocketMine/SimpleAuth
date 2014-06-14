@@ -42,11 +42,11 @@ class DummyDataProvider implements DataProvider{
 		return null;
 	}
 
-	public function unregisterPlayer(IPlayer $player, $hash){
+	public function unregisterPlayer(IPlayer $player){
 
 	}
 
-	public function savePlayer(IPlayer $player, Config $config){
+	public function savePlayer(IPlayer $player, array $config){
 
 	}
 
