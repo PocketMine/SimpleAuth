@@ -1,14 +1,17 @@
 # Default config for SimpleAuth plugin
 
-#Allows registering new accounts by players.
-#If disabled, you can still register new accouts using other plugins.
-allowRegister: true
-
 #Sets the data provider (yaml, sqlite3, mysql, none).
 #Only use none when there is another plugin that will integrate its dataProvider with SimpleAuth
 #Be aware that data is not automatically moved between data providers.
 dataProvider: yaml
-#For MySQL: [host: "127.0.0.1", port: 3306, user: "user", password: "password", database: "databaseName"]
+
+#For MySQL:
+#dataProviderSettings:
+# host: "127.0.0.1"
+# port: 3306
+# user: "user"
+# password: "password"
+# database: "databaseName"
 dataProviderSettings: []
 
 #If enabled, existing logged-in accounts won't be kicked if a new player joins with the same name
@@ -25,6 +28,3 @@ authenticateByLastIP: false
 #Number of seconds to wait for a player to be authenticated. If false, disables the timeout
 #TODO
 authenticateTimeout: 120
-
-#TODO: Make this a permission (guest)
-allowChat: true

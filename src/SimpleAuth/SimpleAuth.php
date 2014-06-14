@@ -220,11 +220,6 @@ class SimpleAuth extends PluginBase{
 						return true;
 					}
 
-					if($this->getConfig()->get("allowRegister") === false){
-						$sender->sendMessage("Registrations are disabled.");
-						return true;
-					}
-
 					$password = implode(" ", $args);
 					if(strlen($password) < $this->getConfig()->get("minPasswordLength")){
 						$sender->sendMessage("Your password is too short.");
