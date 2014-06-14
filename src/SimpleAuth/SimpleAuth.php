@@ -90,7 +90,7 @@ class SimpleAuth extends PluginBase{
 			$player->removeAttachment($attachment);
 			unset($this->needAuth[spl_object_hash($player)]);
 		}
-
+		$this->provider->updatePlayer($player, $player->getAddress(), time());
 		$player->sendMessage(TextFormat::GREEN . "You have been authenticated.");
 
 		return true;
@@ -161,8 +161,22 @@ class SimpleAuth extends PluginBase{
 		return true;
 	}
 
+	/**
+	 * @api
+	 *
+	 * @param DataProvider $provider
+	 */
 	public function setDataProvider(DataProvider $provider){
 		$this->provider = $provider;
+	}
+
+	/**
+	 * @api
+	 *
+	 * @return DataProvider
+	 */
+	public function getDataProvider(){
+		return $this->provider;
 	}
 
 	/* -------------------------- Non-API part -------------------------- */

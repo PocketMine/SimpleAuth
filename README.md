@@ -67,6 +67,7 @@ All methods are available through the main plugin object
 * bool registerPlayer(pocketmine\IPlayer $player, $password)
 * bool unregisterPlayer(pocketmine\IPlayer $player)
 * void setDataProvider(SimpleAuth\provider\DataProvider $provider)
+* SimpleAuth\provider\DataProvider getDataProvider(void)
 
 ### Implementing your own DataProvider
 
