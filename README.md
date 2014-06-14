@@ -37,8 +37,8 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 | authenticateByLastIP | boolean | false | Enables authentication by last IP. |
 | dataProvider | string | yaml | Selects the provider to get the data from (yaml, sqlite3, mysql, none) |
 | dataProviderSettings | array | Sets the settings for the chosen dataProvider |
-| disableRegister | false | Will set all the permissions for simleauth.command.register to false |
-| disableLogin | false | Will set all the permissions for simleauth.command.login to false |
+| disableRegister | boolean | false | Will set all the permissions for simleauth.command.register to false |
+| disableLogin | boolean | false | Will set all the permissions for simleauth.command.login to false |
 
 ## Permissions
 
