@@ -28,6 +28,7 @@ use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
@@ -47,6 +48,28 @@ class EventListener implements Listener{
 	 */
 	public function onPlayerJoin(PlayerJoinEvent $event){
 		$this->plugin->deauthenticatePlayer($event->getPlayer());
+	}
+
+	/**
+	 * @param PlayerPreLoginEvent $event
+	 *
+	 * @priority HIGHEST
+	 */
+	public function onPlayerPreLogin(PlayerPreLoginEvent $event){
+		if($this->plugin->getConfig()->get("forceSingleSession") !== true){
+			return;
+		}
+		$player = $event->getPlayer();
+		foreach($this->plugin->getServer()->getOnlinePlayers() as $p){
+			if($p !== $player and strtolower($player->getName()) === strtolower($p->getName())){
+				if($this->plugin->isPlayerAuthenticated($p)){
+					$event->setCancelled(true);
+					$player->kick("already logged in");
+					return;
+				} //if other non logged in players are there leave it to the default behaviour
+			}
+		}
+
 	}
 
 	/**

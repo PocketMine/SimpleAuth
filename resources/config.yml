@@ -15,7 +15,6 @@ dataProvider: yaml
 dataProviderSettings: []
 
 #If enabled, existing logged-in accounts won't be kicked if a new player joins with the same name
-#TODO: Add permission
 forceSingleSession: true
 
 #Sets the minimum amount of characters to be used when registering a new account

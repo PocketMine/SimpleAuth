@@ -32,7 +32,7 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 | Configuration | Type | Default | Description |
 | :---: | :---: | :---: | :--- |
 | timeout | integer | 60 | Unauthenticated players will be kicked after this period of time. Set it to 0 to disable. (TODO) |
-| forceSingleSession | boolean | true | New players won't kick an authenticated player if using the same name. (TODO) |
+| forceSingleSession | boolean | true | New players won't kick an authenticated player if using the same name. |
 | minPasswordLength | integer | 6 | Minimum length of the register password. |
 | authenticateByLastIP | boolean | false | Enables authentication by last IP. (TODO) |
 | dataProvider | string | yaml | Selects the provider to get the data from (yaml, sqlite3, mysql, none) |
