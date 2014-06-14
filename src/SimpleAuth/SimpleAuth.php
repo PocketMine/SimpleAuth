@@ -248,23 +248,28 @@ class SimpleAuth extends PluginBase{
 		$this->reloadConfig();
 
 		$provider = $this->getConfig()->get("dataProvider");
+		unset($this->provider);
 		switch(strtolower($provider)){
 			case "yaml":
 				$this->getLogger()->debug("Using YAML data provider");
-				$this->provider = new YAMLDataProvider($this);
+				$provider = new YAMLDataProvider($this);
 				break;
 			case "sqlite3":
 				$this->getLogger()->debug("Using SQLite3 data provider");
-				$this->provider = new SQLite3DataProvider($this);
+				$provider = new SQLite3DataProvider($this);
 				break;
 			case "mysql":
 				$this->getLogger()->debug("Using MySQL data provider");
-				$this->provider = new MySQLDataProvider($this);
+				$provider = new MySQLDataProvider($this);
 				break;
 			case "none":
 			default:
-				$this->provider = new DummyDataProvider($this);
+				$provider = new DummyDataProvider($this);
 				break;
+		}
+
+		if(!isset($this->provider) or !($this->provider instanceof DataProvider)){ //Fix for getting a Dummy provider
+			$this->provider = $provider;
 		}
 
 		$this->listener = new EventListener($this);
