@@ -17,12 +17,12 @@
 
 namespace SimpleAuth;
 
-use pocketmine\event\Listener;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityMoveEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
+use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -35,6 +35,7 @@ use pocketmine\Player;
 class EventListener implements Listener{
 	/** @var SimpleAuth */
 	private $plugin;
+
 	public function __construct(SimpleAuth $plugin){
 		$this->plugin = $plugin;
 	}

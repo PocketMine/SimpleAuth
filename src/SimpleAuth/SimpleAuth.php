@@ -20,14 +20,17 @@ namespace SimpleAuth;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\IPlayer;
-use pocketmine\OfflinePlayer;
 use pocketmine\permission\PermissionAttachment;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
-use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
 use SimpleAuth\event\PlayerAuthenticateEvent;
 use SimpleAuth\event\PlayerDeauthenticateEvent;
+use SimpleAuth\event\PlayerRegisterEvent;
+use SimpleAuth\event\PlayerUnregisterEvent;
+use SimpleAuth\provider\DataProvider;
+use SimpleAuth\provider\DummyDataProvider;
+use SimpleAuth\provider\YAMLDataProvider;
 
 class SimpleAuth extends PluginBase{
 
@@ -36,6 +39,9 @@ class SimpleAuth extends PluginBase{
 
 	/** @var EventListener */
 	protected $listener;
+
+	/** @var DataProvider */
+	protected $provider;
 
 	/**
 	 * @api
@@ -48,8 +54,15 @@ class SimpleAuth extends PluginBase{
 		return !isset($this->needAuth[spl_object_hash($player)]);
 	}
 
+	/**
+	 * @api
+	 *
+	 * @param IPlayer $player
+	 *
+	 * @return bool
+	 */
 	public function isPlayerRegistered(IPlayer $player){
-		return $this->getPlayer($player->getName()) instanceof Config;
+		return $this->provider->isPlayerRegistered($player);
 	}
 
 	/**
@@ -76,6 +89,8 @@ class SimpleAuth extends PluginBase{
 			unset($this->needAuth[spl_object_hash($player)]);
 		}
 
+		$player->sendMessage(TextFormat::GREEN . "You have been authenticated.");
+
 		return true;
 	}
 
@@ -100,7 +115,52 @@ class SimpleAuth extends PluginBase{
 		$this->removePermissions($attachment);
 		$this->needAuth[spl_object_hash($player)] = $attachment;
 
+		$player->sendMessage(TextFormat::RED . "You are not authenticated anymore.");
+
 		return true;
+	}
+
+	/**
+	 * @api
+	 *
+	 * @param IPlayer $player
+	 * @param string  $password
+	 *
+	 * @return bool
+	 */
+	public function registerPlayer(IPlayer $player, $password){
+		if(!$this->isPlayerRegistered($player)){
+			$this->getServer()->getPluginManager()->callEvent($ev = new PlayerRegisterEvent($this, $player));
+			if($ev->isCancelled()){
+				return false;
+			}
+			$this->provider->registerPlayer($player, $this->hash($player->getName(), $password));
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @api
+	 *
+	 * @param IPlayer $player
+	 *
+	 * @return bool
+	 */
+	public function unregisterPlayer(IPlayer $player){
+		if($this->isPlayerRegistered($player)){
+			$this->getServer()->getPluginManager()->callEvent($ev = new PlayerUnregisterEvent($this, $player));
+			if($ev->isCancelled()){
+				return false;
+			}
+			$this->provider->unregisterPlayer($player);
+		}
+
+		return true;
+	}
+
+	public function setDataProvider(DataProvider $provider){
+		$this->provider = $provider;
 	}
 
 	/* -------------------------- Non-API part -------------------------- */
@@ -111,7 +171,7 @@ class SimpleAuth extends PluginBase{
 
 	public function sendAuthenticateMessage(Player $player){
 		//TODO: multilang (when implemented in PocketMine-MP)
-		$config = $this->getPlayer($player->getName());
+		$config = $this->provider->getPlayer($player);
 		$player->sendMessage("This server uses SimpleAuth. You must authenticate to play.");
 		if($config === null){
 			$player->sendMessage("Register your account with: /register <password>");
@@ -124,14 +184,29 @@ class SimpleAuth extends PluginBase{
 		switch($command->getName()){
 			case "login":
 				if($sender instanceof Player){
-					if(!$this->isPlayerRegistered($sender)){
+					if(!$this->isPlayerRegistered($sender) or ($data = $this->provider->getPlayer($sender)) === null){
 						$sender->sendMessage(TextFormat::RED . "This account is not registered.");
+
+						return true;
+					}
+					if(count($args) !== 1){
+						$sender->sendMessage(TextFormat::RED . "Usage: " . $command->getUsage());
+
 						return true;
 					}
 
-					//TODO: log in logic
+					$password = implode(" ", $args);
+
+					if($this->hash(strtolower($sender->getName()), $password) === $data->get("hash") and $this->authenticatePlayer($sender)){
+						return true;
+					}else{
+						$sender->sendMessage(TextFormat::RED . "Error during authentication.");
+
+						return true;
+					}
 				}else{
 					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+
 					return true;
 				}
 				break;
@@ -139,12 +214,30 @@ class SimpleAuth extends PluginBase{
 				if($sender instanceof Player){
 					if($this->isPlayerRegistered($sender)){
 						$sender->sendMessage(TextFormat::RED . "This account is already registered.");
+
 						return true;
 					}
 
-					//TODO: register login
+					if($this->getConfig()->get("allowRegister") === false){
+						$sender->sendMessage("Registrations are disabled.");
+						return true;
+					}
+
+					$password = implode(" ", $args);
+					if(strlen($password) < $this->getConfig()->get("minPasswordLength")){
+						$sender->sendMessage("Your password is too short.");
+						return true;
+					}
+
+					if($this->registerPlayer($sender, $password) and $this->authenticatePlayer($sender)){
+						return true;
+					}else{
+						$sender->sendMessage(TextFormat::RED . "Error during authentication.");
+						return true;
+					}
 				}else{
 					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+
 					return true;
 				}
 				break;
@@ -156,8 +249,20 @@ class SimpleAuth extends PluginBase{
 	public function onEnable(){
 		$this->saveDefaultConfig();
 		$this->reloadConfig();
-		if(!file_exists($this->getDataFolder() . "players/")){
-			@mkdir($this->getDataFolder() . "players/");
+
+		$provider = $this->getConfig()->get("dataProvider");
+		switch(strtolower($provider)){
+			case "yaml":
+				$this->provider = new YAMLDataProvider($this);
+				break;
+			case "sqlite3":
+				//TODO
+			case "mysql":
+				//TODO
+			case "none":
+			default:
+				$this->provider = new DummyDataProvider($this);
+				break;
 		}
 
 		$this->listener = new EventListener($this);
@@ -170,6 +275,12 @@ class SimpleAuth extends PluginBase{
 		$this->getLogger()->info("Everything loaded!");
 	}
 
+	public function onDisable(){
+		$this->getServer()->getPluginManager();
+		$this->saveConfig();
+		$this->provider->close();
+	}
+
 	protected function removePermissions(PermissionAttachment $attachment){
 		$attachment->setPermission("pocketmine", false);
 		$attachment->setPermission("pocketmine.command.help", true);
@@ -179,40 +290,18 @@ class SimpleAuth extends PluginBase{
 		$attachment->setPermission("simpleauth.command.register", true);
 	}
 
-	public function onDisable(){
-		$this->saveConfig();
-	}
-
 	/**
-	 * @param string $name
-	 * @param Config $config
-	 */
-	protected function savePlayer($name, Config $config){
-		$name = trim(strtolower($name));
-		if($name === ""){
-			return;
-		}
-		$path = $this->getDataFolder() . "players/".$name{0}."/";
-		if(!file_exists($path)){
-			@mkdir($path, 0755, true);
-		}
-	}
-
-	/**
-	 * @param string $name
+	 * Uses SHA-512 [http://en.wikipedia.org/wiki/SHA-2] an Whirlpool [http://en.wikipedia.org/wiki/Whirlpool_(cryptography)]
 	 *
-	 * @return Config
+	 * Both of them have an output of 512 bits. Even if one of them is broken in the future, you have to break both of them
+	 * at the same time due to being hashed separately and then XORed to mix their results equally.
+	 *
+	 * @param string $salt
+	 * @param string $password
+	 *
+	 * @return string[1024] hex 512-bit hash
 	 */
-	protected function getPlayer($name){
-		$name = trim(strtolower($name));
-		if($name === ""){
-			return null;
-		}
-		$path = $this->getDataFolder() . "players/".$name{0}."/$name.yml";
-		if(!file_exists($path)){
-			return null;
-		}else{
-			return new Config($path, Config::YAML);
-		}
+	private function hash($salt, $password){
+		return bin2hex(hash("sha512", $password . $salt, true) ^ hash("whirlpool", $salt . $password, true));
 	}
 }

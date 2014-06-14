@@ -4,6 +4,12 @@
 #If disabled, you can still register new accouts using other plugins.
 allowRegister: true
 
+#Sets the data provider (yaml, sqlite3, mysql, none).
+#Only use none when there is another plugin that will integrate its dataProvider with SimpleAuth
+#Be aware that data is not automatically moved between data providers.
+dataProvider: yaml
+dataProviderSettings: []
+
 #If enabled, existing logged-in accounts won't be kicked if a new player joins with the same name
 #TODO: Add permission
 forceSingleSession: true
