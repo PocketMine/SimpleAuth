@@ -42,7 +42,8 @@ class YAMLDataProvider implements DataProvider{
 		if(!file_exists($path)){
 			return null;
 		}else{
-			return new Config($path, Config::YAML);
+			$config = new Config($path, Config::YAML);
+			return $config->getAll();
 		}
 	}
 
@@ -67,13 +68,13 @@ class YAMLDataProvider implements DataProvider{
 		$data->set("hash", $hash);
 		$data->save();
 
-		return $data;
+		return $data->getAll();
 	}
 
-	public function savePlayer(IPlayer $player, Config $config){
+	public function savePlayer(IPlayer $player, array $config){
 		$name = trim(strtolower($player->getName()));
 		$data = new Config($this->plugin->getDataFolder() . "players/" . $name{0} . "/$name.yml", Config::YAML);
-		$data->setAll($config->getAll());
+		$data->setAll($config);
 		$data->save();
 	}
 
@@ -81,10 +82,10 @@ class YAMLDataProvider implements DataProvider{
 		$data = $this->getPlayer($player);
 		if($data !== null){
 			if($lastIP !== null){
-				$data->set("lastip", $lastIP);
+				$data["lastip"] = $lastIP;
 			}
 			if($loginDate !== null){
-				$data->set("logindate", $loginDate);
+				$data["logindate"] = $loginDate;
 			}
 			$this->savePlayer($player, $data);
 		}

@@ -31,7 +31,7 @@ interface DataProvider{
 	/**
 	 * @param IPlayer $player
 	 *
-	 * @return Config, or null if it does not exist
+	 * @return array, or null if it does not exist
 	 */
 	public function getPlayer(IPlayer $player);
 
@@ -46,7 +46,7 @@ interface DataProvider{
 	 * @param IPlayer $player
 	 * @param string  $hash
 	 *
-	 * @return Config, or null if error happened
+	 * @return array, or null if error happened
 	 */
 	public function registerPlayer(IPlayer $player, $hash);
 
@@ -57,9 +57,9 @@ interface DataProvider{
 
 	/**
 	 * @param IPlayer $player
-	 * @param Config  $config
+	 * @param array   $config
 	 */
-	public function savePlayer(IPlayer $player, Config $config);
+	public function savePlayer(IPlayer $player, array $config);
 
 	/**
 	 * @param IPlayer $player

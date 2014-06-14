@@ -30,6 +30,7 @@ use SimpleAuth\event\PlayerRegisterEvent;
 use SimpleAuth\event\PlayerUnregisterEvent;
 use SimpleAuth\provider\DataProvider;
 use SimpleAuth\provider\DummyDataProvider;
+use SimpleAuth\provider\SQLite3DataProvider;
 use SimpleAuth\provider\YAMLDataProvider;
 
 class SimpleAuth extends PluginBase{
@@ -197,7 +198,7 @@ class SimpleAuth extends PluginBase{
 
 					$password = implode(" ", $args);
 
-					if($this->hash(strtolower($sender->getName()), $password) === $data->get("hash") and $this->authenticatePlayer($sender)){
+					if($this->hash(strtolower($sender->getName()), $password) === $data["hash"] and $this->authenticatePlayer($sender)){
 						return true;
 					}else{
 						$sender->sendMessage(TextFormat::RED . "Error during authentication.");
@@ -253,10 +254,13 @@ class SimpleAuth extends PluginBase{
 		$provider = $this->getConfig()->get("dataProvider");
 		switch(strtolower($provider)){
 			case "yaml":
+				$this->getLogger()->debug("Using YAML data provider");
 				$this->provider = new YAMLDataProvider($this);
 				break;
 			case "sqlite3":
-				//TODO
+				$this->getLogger()->debug("Using SQLite3 data provider");
+				$this->provider = new SQLite3DataProvider($this);
+				break;
 			case "mysql":
 				//TODO
 			case "none":
@@ -277,7 +281,6 @@ class SimpleAuth extends PluginBase{
 
 	public function onDisable(){
 		$this->getServer()->getPluginManager();
-		$this->saveConfig();
 		$this->provider->close();
 	}
 

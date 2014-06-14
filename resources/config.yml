@@ -22,10 +22,8 @@ minPasswordLength: 6
 authenticateByLastIP: false
 
 #Number of seconds to wait for a player to be authenticated. If false, disables the timeout
+#TODO
 authenticateTimeout: 120
-
-#Interval that players will be asked to authenticate
-messageInterval: 15
 
 #TODO: Make this a permission (guest)
 allowChat: true
