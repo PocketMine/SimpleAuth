@@ -136,7 +136,7 @@ class SimpleAuth extends PluginBase{
 			if($ev->isCancelled()){
 				return false;
 			}
-			$this->provider->registerPlayer($player, $this->hash($player->getName(), $password));
+			$this->provider->registerPlayer($player, $this->hash(strtolower($player->getName()), $password));
 			return true;
 		}
 		return false;
