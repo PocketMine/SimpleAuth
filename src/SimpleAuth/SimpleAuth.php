@@ -117,7 +117,12 @@ class SimpleAuth extends PluginBase{
 		$this->removePermissions($attachment);
 		$this->needAuth[spl_object_hash($player)] = $attachment;
 
-		$player->sendMessage(TextFormat::RED . "You are not authenticated anymore.");
+		$player->sendMessage("You must authenticate to play.");
+        	if($config === null){
+            		$player->sendMessage("Register your account with: /register <password>");
+        	}else{
+            		$player->sendMessage("Log in to your account with: /login <password>");
+        	}
 
 		return true;
 	}
