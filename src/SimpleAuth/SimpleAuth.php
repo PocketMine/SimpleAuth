@@ -22,6 +22,7 @@ use pocketmine\command\CommandSender;
 use pocketmine\IPlayer;
 use pocketmine\permission\PermissionAttachment;
 use pocketmine\Player;
+use pocketmine\Server;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use SimpleAuth\event\PlayerAuthenticateEvent;
@@ -89,6 +90,7 @@ class SimpleAuth extends PluginBase{
 			$attachment->unsetPermission("pocketmine");
 			$player->removeAttachment($attachment);
 			unset($this->needAuth[spl_object_hash($player)]);
+			$player->recalculatePermissions();
 		}
 		$this->provider->updatePlayer($player, $player->getAddress(), time());
 		$player->sendMessage(TextFormat::GREEN . "You have been authenticated.");
@@ -116,8 +118,9 @@ class SimpleAuth extends PluginBase{
 		$attachment = $player->addAttachment($this);
 		$this->removePermissions($attachment);
 		$this->needAuth[spl_object_hash($player)] = $attachment;
+		$player->recalculatePermissions();
 
-		$player->sendMessage(TextFormat::RED . "You are not authenticated anymore.");
+		$this->sendAuthenticateMessage($player);
 
 		return true;
 	}
@@ -302,8 +305,17 @@ class SimpleAuth extends PluginBase{
 	}
 
 	protected function removePermissions(PermissionAttachment $attachment){
-		$attachment->setPermission("pocketmine", false);
+		foreach($this->getServer()->getPluginManager()->getPermissions() as $permission){
+			$attachment->setPermission($permission, false);
+		}
+
 		$attachment->setPermission("pocketmine.command.help", true);
+		$attachment->setPermission(Server::BROADCAST_CHANNEL_USERS, true);
+		$attachment->setPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, false);
+
+		$attachment->unsetPermission("simpleauth.chat");
+		$attachment->unsetPermission("simpleauth.move");
+		$attachment->unsetPermission("simpleauth.lastip");
 
 		//Do this because of permission manager plugins
 		if($this->getConfig()->get("disableRegister") === true){
