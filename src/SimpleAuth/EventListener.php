@@ -44,7 +44,7 @@ class EventListener implements Listener{
 	/**
 	 * @param PlayerJoinEvent $event
 	 *
-	 * @priority MONITOR
+	 * @priority LOWEST
 	 */
 	public function onPlayerJoin(PlayerJoinEvent $event){
 		if($this->plugin->getConfig()->get("authenticateByLastIP") === true and $event->getPlayer()->hasPermission("simpleauth.lastip")){

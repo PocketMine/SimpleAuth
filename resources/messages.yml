@@ -1,0 +1,24 @@
+# SimpleAuth 1.4.0 language file
+
+join:
+ message: "This server uses SimpleAuth.\nYou must authenticate to play."
+ register: "You are not registered.\nPlease register using: /register <password>"
+ login: "Please log in using: /login <password>"
+
+register:
+ usage: "/register <password>"
+ description: "Registers an account"
+ permission: "You do not have permission to use the register command!"
+ error:
+  password: "Your password is too short!"
+  registered: "This account is already registered."
+  general: "Error during authentication."
+
+login:
+ usage: "/login <password>"
+ description: "Logs into an account"
+ permission: "You do not have permission to use the login command!"
+ success: "You have been authenticated."
+ error:
+  password: "Incorrect password!"
+  registered: "This account is not registered."

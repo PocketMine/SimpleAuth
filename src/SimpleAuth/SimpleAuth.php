@@ -20,7 +20,9 @@ namespace SimpleAuth;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\IPlayer;
+use pocketmine\utils\Config;
 use pocketmine\permission\PermissionAttachment;
+use pocketmine\permission\Permission;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\plugin\PluginBase;
@@ -45,6 +47,9 @@ class SimpleAuth extends PluginBase{
 
 	/** @var DataProvider */
 	protected $provider;
+
+	/** @var string[] */
+	protected $messages = [];
 
 	/**
 	 * @api
@@ -87,13 +92,12 @@ class SimpleAuth extends PluginBase{
 
 		if(isset($this->needAuth[spl_object_hash($player)])){
 			$attachment = $this->needAuth[spl_object_hash($player)];
-			$attachment->unsetPermission("pocketmine");
 			$player->removeAttachment($attachment);
 			unset($this->needAuth[spl_object_hash($player)]);
 			$player->recalculatePermissions();
 		}
 		$this->provider->updatePlayer($player, $player->getAddress(), time());
-		$player->sendMessage(TextFormat::GREEN . "You have been authenticated.");
+		$player->sendMessage(TextFormat::GREEN . $this->getMessage("login.success"));
 
 		return true;
 	}
@@ -189,13 +193,12 @@ class SimpleAuth extends PluginBase{
 	}
 
 	public function sendAuthenticateMessage(Player $player){
-		//TODO: multilang (when implemented in PocketMine-MP)
 		$config = $this->provider->getPlayer($player);
-		$player->sendMessage("This server uses SimpleAuth. You must authenticate to play.");
+		$player->sendMessage($this->getMessage("join.message"));
 		if($config === null){
-			$player->sendMessage("Register your account with: /register <password>");
+			$player->sendMessage($this->getMessage("join.register"));
 		}else{
-			$player->sendMessage("Log in to your account with: /login <password>");
+			$player->sendMessage($this->getMessage("join.login"));
 		}
 	}
 
@@ -204,7 +207,7 @@ class SimpleAuth extends PluginBase{
 			case "login":
 				if($sender instanceof Player){
 					if(!$this->isPlayerRegistered($sender) or ($data = $this->provider->getPlayer($sender)) === null){
-						$sender->sendMessage(TextFormat::RED . "This account is not registered.");
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.registered"));
 
 						return true;
 					}
@@ -219,7 +222,7 @@ class SimpleAuth extends PluginBase{
 					if($this->hash(strtolower($sender->getName()), $password) === $data["hash"] and $this->authenticatePlayer($sender)){
 						return true;
 					}else{
-						$sender->sendMessage(TextFormat::RED . "Error during authentication.");
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.password"));
 
 						return true;
 					}
@@ -232,21 +235,21 @@ class SimpleAuth extends PluginBase{
 			case "register":
 				if($sender instanceof Player){
 					if($this->isPlayerRegistered($sender)){
-						$sender->sendMessage(TextFormat::RED . "This account is already registered.");
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("register.error.registered"));
 
 						return true;
 					}
 
 					$password = implode(" ", $args);
 					if(strlen($password) < $this->getConfig()->get("minPasswordLength")){
-						$sender->sendMessage("Your password is too short.");
+						$sender->sendMessage($this->getMessage("register.error.password"));
 						return true;
 					}
 
 					if($this->registerPlayer($sender, $password) and $this->authenticatePlayer($sender)){
 						return true;
 					}else{
-						$sender->sendMessage(TextFormat::RED . "Error during authentication.");
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("register.error.general"));
 						return true;
 					}
 				}else{
@@ -260,9 +263,44 @@ class SimpleAuth extends PluginBase{
 		return false;
 	}
 
+	private function parseMessages(array $messages){
+		$result = [];
+		foreach($messages as $key => $value){
+			if(is_array($value)){
+				foreach($this->parseMessages($value) as $k => $v){
+					$result[$key . "." . $k] = $v;
+				}
+			}else{
+				$result[$key] = $value;
+			}
+		}
+
+		return $result;
+	}
+
+	public function getMessage($key){
+		return isset($this->messages[$key]) ? $this->messages[$key] : $key;
+	}
+
 	public function onEnable(){
 		$this->saveDefaultConfig();
 		$this->reloadConfig();
+
+		$this->saveResource("messages.yml", false);
+
+		$messages = (new Config($this->getDataFolder() . "messages.yml"))->getAll();
+
+		$this->messages = $this->parseMessages($messages);
+
+		$registerCommand = $this->getCommand("register");
+		$registerCommand->setUsage($this->getMessage("register.usage"));
+		$registerCommand->setDescription($this->getMessage("register.description"));
+		$registerCommand->setPermissionMessage($this->getMessage("register.permission"));
+
+		$loginCommand = $this->getCommand("login");
+		$loginCommand->setUsage($this->getMessage("login.usage"));
+		$loginCommand->setDescription($this->getMessage("login.description"));
+		$loginCommand->setPermissionMessage($this->getMessage("login.permission"));
 
 		$provider = $this->getConfig()->get("dataProvider");
 		unset($this->provider);
@@ -304,32 +342,64 @@ class SimpleAuth extends PluginBase{
 		$this->provider->close();
 	}
 
+	public static function orderPermissionsCallback($perm1, $perm2){
+		if(self::isChild($perm1, $perm2)){
+			return -1;
+		}elseif(self::isChild($perm2, $perm1)){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+
+	public static function isChild($perm, $name){
+		$perm = explode(".", $perm);
+		$name = explode(".", $name);
+
+		foreach($perm as $k => $component){
+			if(!isset($name[$k])){
+				return false;
+			}elseif($name[$k] !== $component){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	protected function removePermissions(PermissionAttachment $attachment){
+		$permissions = [];
 		foreach($this->getServer()->getPluginManager()->getPermissions() as $permission){
+			$permissions[$permission->getName()] = false;
 			$attachment->setPermission($permission, false);
 		}
 
-		$attachment->setPermission("pocketmine.command.help", true);
-		$attachment->setPermission(Server::BROADCAST_CHANNEL_USERS, true);
-		$attachment->setPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE, false);
+		$permissions["pocketmine.command.help"] = true;
+		$permissions[Server::BROADCAST_CHANNEL_USERS] = true;
+		$permissions[Server::BROADCAST_CHANNEL_ADMINISTRATIVE] = false;
 
-		$attachment->unsetPermission("simpleauth.chat");
-		$attachment->unsetPermission("simpleauth.move");
-		$attachment->unsetPermission("simpleauth.lastip");
+		unset($permissions["simpleauth.chat"]);
+		unset($permissions["simpleauth.move"]);
+		unset($permissions["simpleauth.lastip"]);
 
 		//Do this because of permission manager plugins
 		if($this->getConfig()->get("disableRegister") === true){
-			$attachment->setPermission("simpleauth.command.register", false);
+			$permissions["simpleauth.command.register"] = false;
 		}else{
-			$attachment->setPermission("simpleauth.command.register", true);
+			$permissions["simpleauth.command.register"] = true;
 		}
 
 		if($this->getConfig()->get("disableLogin") === true){
-			$attachment->setPermission("simpleauth.command.login", false);
+			$permissions["simpleauth.command.register"] = false;
 		}else{
-			$attachment->setPermission("simpleauth.command.login", true);
+			$permissions["simpleauth.command.login"] = true;
 		}
 
+		uksort($permissions, [SimpleAuth::class, "orderPermissionsCallback"]); //Set them in the correct order
+
+		foreach($permissions as $name => $value){
+			$attachment->setPermission($name, $value);
+		}
 	}
 
 	/**
