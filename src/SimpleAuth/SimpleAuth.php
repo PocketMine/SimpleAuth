@@ -94,7 +94,6 @@ class SimpleAuth extends PluginBase{
 			$attachment = $this->needAuth[spl_object_hash($player)];
 			$player->removeAttachment($attachment);
 			unset($this->needAuth[spl_object_hash($player)]);
-			$player->recalculatePermissions();
 		}
 		$this->provider->updatePlayer($player, $player->getAddress(), time());
 		$player->sendMessage(TextFormat::GREEN . $this->getMessage("login.success"));
@@ -122,7 +121,6 @@ class SimpleAuth extends PluginBase{
 		$attachment = $player->addAttachment($this);
 		$this->removePermissions($attachment);
 		$this->needAuth[spl_object_hash($player)] = $attachment;
-		$player->recalculatePermissions();
 
 		$this->sendAuthenticateMessage($player);
 
@@ -371,7 +369,6 @@ class SimpleAuth extends PluginBase{
 		$permissions = [];
 		foreach($this->getServer()->getPluginManager()->getPermissions() as $permission){
 			$permissions[$permission->getName()] = false;
-			$attachment->setPermission($permission, false);
 		}
 
 		$permissions["pocketmine.command.help"] = true;
@@ -397,9 +394,7 @@ class SimpleAuth extends PluginBase{
 
 		uksort($permissions, [SimpleAuth::class, "orderPermissionsCallback"]); //Set them in the correct order
 
-		foreach($permissions as $name => $value){
-			$attachment->setPermission($name, $value);
-		}
+		$attachment->setPermissions($permissions);
 	}
 
 	/**
