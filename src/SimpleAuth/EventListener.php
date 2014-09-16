@@ -31,6 +31,7 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\Player;
 
 class EventListener implements Listener{
@@ -167,6 +168,17 @@ class EventListener implements Listener{
 	 */
 	public function onPlayerItemConsume(PlayerItemConsumeEvent $event){
 		if(!$this->plugin->isPlayerAuthenticated($event->getPlayer())){
+			$event->setCancelled(true);
+		}
+	}
+
+	/**
+	 * @param EntityDamageEvent $event
+	 *
+	 * @priority MONITOR
+	 */
+	public function onEntityDamage(EntityDamageEvent $event){
+		if($event->getEntity() instanceof Player and !$this->plugin->isPlayerAuthenticated($event->getEntity())){
 			$event->setCancelled(true);
 		}
 	}
