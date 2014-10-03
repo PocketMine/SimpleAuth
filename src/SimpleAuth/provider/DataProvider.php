@@ -24,11 +24,6 @@ use SimpleAuth\SimpleAuth;
 interface DataProvider{
 
 	/**
-	 * @param SimpleAuth $plugin
-	 */
-	public function __construct(SimpleAuth $plugin);
-
-	/**
 	 * @param IPlayer $player
 	 *
 	 * @return array, or null if it does not exist
