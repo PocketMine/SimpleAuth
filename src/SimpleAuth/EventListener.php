@@ -19,10 +19,10 @@ namespace SimpleAuth;
 
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
-use pocketmine\event\entity\EntityMoveEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -119,8 +119,8 @@ class EventListener implements Listener{
 	 *
 	 * @priority MONITOR
 	 */
-	public function onPlayerMove(EntityMoveEvent $event){
-		$player = $event->getEntity();
+	public function onPlayerMove(PlayerMoveEvent $event){
+		$player = $event->getPlayer();
 		if($player instanceof Player){
 			if(!$this->plugin->isPlayerAuthenticated($player)){
 				if(!$player->hasPermission("simpleauth.move")){
