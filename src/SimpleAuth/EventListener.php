@@ -115,17 +115,14 @@ class EventListener implements Listener{
 	}
 
 	/**
-	 * @param EntityMoveEvent $event
+	 * @param PlayerMoveEvent $event
 	 *
 	 * @priority MONITOR
 	 */
-	public function onPlayerMove(EntityMoveEvent $event){
-		$player = $event->getEntity();
-		if($player instanceof Player){
-			if(!$this->plugin->isPlayerAuthenticated($player)){
-				if(!$player->hasPermission("simpleauth.move")){
-					$event->setCancelled(true);
-				}
+	public function onPlayerMove(PlayerMoveEvent $event){
+		if(!$this->plugin->isPlayerAuthenticated($event->getPlayer())){
+			if(!$event->getPlayer()->hasPermission("simpleauth.move")){
+				$event->setCancelled(true);
 			}
 		}
 	}
