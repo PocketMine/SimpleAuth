@@ -123,7 +123,7 @@ class EventListener implements Listener{
 		if(!$this->plugin->isPlayerAuthenticated($event->getPlayer())){
 			if(!$event->getPlayer()->hasPermission("simpleauth.move")){
 				$event->setCancelled(true);
-				$event->getPlayer()->inAirTicks = 0;
+				//$event->getPlayer()->inAirTicks = 0;
 			}
 		}
 	}
