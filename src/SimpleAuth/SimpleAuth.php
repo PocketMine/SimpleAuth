@@ -217,7 +217,7 @@ class SimpleAuth extends PluginBase{
 
 					$password = implode(" ", $args);
 
-					if($this->hash(strtolower($sender->getName()), $password) === $data["hash"] and $this->authenticatePlayer($sender)){
+					if(hash_equals($data["hash"], $this->hash(strtolower($sender->getName()), $password)) and $this->authenticatePlayer($sender)){
 						return true;
 					}else{
 						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.password"));
