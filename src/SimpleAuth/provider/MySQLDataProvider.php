@@ -62,7 +62,7 @@ class MySQLDataProvider implements DataProvider{
 		if($result instanceof \mysqli_result){
 			$data = $result->fetch_assoc();
 			$result->free();
-			if(isset($data["name"]) and $data["name"] === $name){
+			if(isset($data["name"]) and strtolower($data["name"]) === $name){
 				unset($data["name"]);
 				return $data;
 			}
