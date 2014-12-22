@@ -72,7 +72,7 @@ class EventListener implements Listener{
 			if($p !== $player and strtolower($player->getName()) === strtolower($p->getName())){
 				if($this->plugin->isPlayerAuthenticated($p)){
 					$event->setCancelled(true);
-					$player->kick("already logged in");
+					$player->setKickMessage("already logged in");
 					return;
 				} //if other non logged in players are there leave it to the default behaviour
 			}
