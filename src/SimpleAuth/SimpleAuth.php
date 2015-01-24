@@ -398,7 +398,7 @@ class SimpleAuth extends PluginBase{
 	}
 
 	/**
-	 * Uses SHA-512 [http://en.wikipedia.org/wiki/SHA-2] an Whirlpool [http://en.wikipedia.org/wiki/Whirlpool_(cryptography)]
+	 * Uses SHA-512 [http://en.wikipedia.org/wiki/SHA-2] and Whirlpool [http://en.wikipedia.org/wiki/Whirlpool_(cryptography)]
 	 *
 	 * Both of them have an output of 512 bits. Even if one of them is broken in the future, you have to break both of them
 	 * at the same time due to being hashed separately and then XORed to mix their results equally.
