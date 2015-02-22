@@ -36,6 +36,7 @@ use SimpleAuth\provider\DummyDataProvider;
 use SimpleAuth\provider\MySQLDataProvider;
 use SimpleAuth\provider\SQLite3DataProvider;
 use SimpleAuth\provider\YAMLDataProvider;
+use pocketmine\event\player\PlayerJoinEvent
 
 class SimpleAuth extends PluginBase{
 
