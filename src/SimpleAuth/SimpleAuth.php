@@ -36,6 +36,7 @@ use SimpleAuth\provider\DummyDataProvider;
 use SimpleAuth\provider\MySQLDataProvider;
 use SimpleAuth\provider\SQLite3DataProvider;
 use SimpleAuth\provider\YAMLDataProvider;
+use pocketmine\event\player\PlayerJoinEvent
 
 class SimpleAuth extends PluginBase{
 
@@ -58,6 +59,16 @@ class SimpleAuth extends PluginBase{
 	 *
 	 * @return bool
 	 */
+	public function onPlayerJoin(PlayerJoinEvent $event){
+		if($this->plugin->getConfig()->get("authenticateByLastIP") === true and $event->getPlayer()->hasPermission("simpleauth.lastip")){
+			$config = $this->plugin->getDataProvider()->getPlayer($event->getPlayer());
+			if($config !== null and $config["lastip"] === $event->getPlayer()->getAddress()){
+				$player->sendMessage(TextFormat::GREEN . $this->getMessage("login.ip"));
+				$this->plugin->authenticatePlayer($event->getPlayer());
+				return;
+			}
+		}
+	 	}
 	public function isPlayerAuthenticated(Player $player){
 		return !isset($this->needAuth[spl_object_hash($player)]);
 	}
