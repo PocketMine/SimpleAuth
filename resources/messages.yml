@@ -19,6 +19,7 @@ login:
  description: "Logs into an account"
  permission: "You do not have permission to use the login command!"
  success: "You have been authenticated."
+ ip: "You have been authenticated by last IP."
  error:
   password: "Incorrect password!"
   registered: "This account is not registered."
