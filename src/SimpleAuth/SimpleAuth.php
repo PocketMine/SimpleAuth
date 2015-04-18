@@ -256,6 +256,39 @@ class SimpleAuth extends PluginBase{
 					return true;
 				}
 				break;
+			case "unregister":
+				if($sender instanceof Player){
+					if(!$this->isPlayerRegistered($sender) or ($data = $this->provider->getPlayer($sender)) === null){
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.registered"));
+
+						return true;
+					}
+					if(count($args) !== 1){
+						$sender->sendMessage(TextFormat::RED . "Usage: " . $command->getUsage());
+
+						return true;
+					}
+
+					$password = implode(" ", $args);
+
+					if(hash_equals($data["hash"], $this->hash(strtolower($sender->getName()), $password))) {
+						if ($this->deauthenticatePlayer($sender) and $this->unregisterPlayer($sender)) {
+							$sender->sendMessage(TextFormat::RED . $this->getMessage("join.register"));
+						} else {
+							$sender->sendMessage(TextFormat::RED . $this->getMessage("register.error.general"));
+						}
+						return true;
+					}else{
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.password"));
+
+						return true;
+					}
+				}else{
+					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+
+					return true;
+				}
+				break;
 		}
 
 		return false;
