@@ -289,8 +289,29 @@ class SimpleAuth extends PluginBase{
 					return true;
 				}
 				break;
+			case "simpleauth":
+				if(count($args) < 2){
+					return false;
+				}
+				$subcmd = strtolower(array_shift($args));
+				switch($subcmd){
+					case "unregister":
+						foreach($args as $name){
+							$player = $this->getServer()->getOfflinePlayer($name);
+							if($this->unregisterPlayer($player)){
+								$sender->sendMessage(TextFormat::GREEN . "$name unregistered");
+								if($player instanceof Player){
+									$player->sendMessage(TextFormat::YELLOW."You are no longer registered!");
+									$this->deauthenticatePlayer($player);
+								}
+							}else{
+								$sender->sendMessage(TextFormat::RED . "Unable to unregister $name");
+							}
+						return true;
+						}
+				}
+				break;
 		}
-
 		return false;
 	}
 
