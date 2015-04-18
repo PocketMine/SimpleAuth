@@ -217,6 +217,21 @@ class SimpleAuth extends PluginBase{
 		return $this->provider;
 	}
 
+	/**
+	 * @api
+	 *
+	 * @param IPlayer $player
+	 * @param string $password
+	 *
+	 * @return bool
+	 */
+	public function checkPassword(IPlayer $player, $password){
+		if(($data = $this->provider->getPlayer($player)) === null){
+			return false;
+		}
+		return hash_equals($data["hash"], $this->hash(strtolower($player->getName()), $password));
+	}
+
 	/* -------------------------- Non-API part -------------------------- */
 
 	public function closePlayer(Player $player){
@@ -252,7 +267,7 @@ class SimpleAuth extends PluginBase{
 
 					$password = implode(" ", $args);
 
-					if(hash_equals($data["hash"], $this->hash(strtolower($sender->getName()), $password)) and $this->authenticatePlayer($sender)){
+					if($this->checkPassword($sender, $password) and $this->authenticatePlayer($sender)){
 						return true;
 					}else{
 						$this->tryAuthenticatePlayer($sender);
@@ -261,7 +276,7 @@ class SimpleAuth extends PluginBase{
 						return true;
 					}
 				}else{
-					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+					$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.ingame"));
 
 					return true;
 				}
@@ -287,13 +302,67 @@ class SimpleAuth extends PluginBase{
 						return true;
 					}
 				}else{
-					$sender->sendMessage(TextFormat::RED . "This command only works in-game.");
+					$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.ingame"));
 
 					return true;
 				}
 				break;
-		}
+			case "unregister":
+				if($sender instanceof Player){
+					if(!$this->isPlayerRegistered($sender) or ($data = $this->provider->getPlayer($sender)) === null){
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.registered"));
 
+						return true;
+					}
+					if(count($args) !== 1){
+						$sender->sendMessage(TextFormat::RED . "Usage: " . $command->getUsage());
+
+						return true;
+					}
+
+					$password = implode(" ", $args);
+
+					if($this->checkPassword($sender, $password)){
+						if ($this->deauthenticatePlayer($sender) and $this->unregisterPlayer($sender)){
+							$sender->sendMessage(TextFormat::RED . $this->getMessage("join.register"));
+						}else{
+							$sender->sendMessage(TextFormat::RED . $this->getMessage("register.error.general"));
+						}
+						return true;
+					}else{
+						$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.password"));
+
+						return true;
+					}
+				}else{
+					$sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.ingame"));
+
+					return true;
+				}
+				break;
+			case "simpleauth":
+				if(count($args) < 2){
+					return false;
+				}
+				$subcmd = strtolower(array_shift($args));
+				switch($subcmd){
+					case "unregister":
+						foreach($args as $name){
+							$player = $this->getServer()->getOfflinePlayer($name);
+							if($this->unregisterPlayer($player)){
+								$sender->sendMessage(TextFormat::GREEN . sprintf($this->getMessage("simpleauth.unregistered"), $name));
+								if($player instanceof Player){
+									$player->sendMessage(TextFormat::YELLOW.$this->getMessage("simpleauth.notregistered"));
+									$this->deauthenticatePlayer($player);
+								}
+							}else{
+								$sender->sendMessage(TextFormat::RED . sprintf($this->getMessage("simpleauth.error.unregister"), $name));
+							}
+						return true;
+						}
+				}
+				break;
+		}
 		return false;
 	}
 

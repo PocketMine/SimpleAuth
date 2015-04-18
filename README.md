@@ -21,8 +21,8 @@ Plugin for PocketMine-MP that prevents people to impersonate an account, requeri
 
 * `/login <password>`
 * `/register <password>`
-* `/unregister <password>` (TODO)
-* For OPs: `/simpleauth <command: help|unregister> [parameters...]` (TODO)
+* `/unregister <password>`
+* For OPs: `/simpleauth <command: unregister> [players ...]`
 
 
 ## Configuration
@@ -50,6 +50,7 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 | simpleauth.lastip | true | Allows authenticating using the lastIP when enabled in the config |
 | simpleauth.command.register | true | Allows registering an account |
 | simpleauth.command.login | true | Allows logging into an account |
+| simpleauth.command.simpleauth | op | Manage accounts |
 
 ## For developers
 
