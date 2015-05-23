@@ -1,7 +1,7 @@
 name: SimpleAuth
 main: SimpleAuth\SimpleAuth
 version: 1.7.0
-api: 1.8.0
+api: 1.12.0
 load: STARTUP
 author: PocketMine Team
 authors: [shoghicp]
@@ -28,9 +28,9 @@ permissions:
    simpleauth.move:
     description: "Allows moving while not being authenticated"
     default: false
-   simpleauth.lastip:
-    description: "Allows authenticating using the lastIP when enabled in the config"
-    default: notop
+   simpleauth.lastid:
+    description: "Allows authenticating using the last id when enabled in the config"
+    default: true
    simpleauth.command:
     description: "Allows using SimpleAuth commands"
     default: true

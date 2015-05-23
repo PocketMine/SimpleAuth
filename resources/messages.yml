@@ -1,9 +1,11 @@
 # SimpleAuth 1.4.0 language file
 
 join:
- message: "This server uses SimpleAuth.\nYou must authenticate to play."
- register: "You are not registered.\nPlease register using: /register <password>"
+ message1: "This server requires account registration."
+ message2: "You must authenticate to play."
+ register: "Please register using: /register <password>"
  login: "Please log in using: /login <password>"
+ popup: "You are not logged in"
 
 register:
  usage: "/register <password>"
@@ -22,3 +24,4 @@ login:
  error:
   password: "Incorrect password!"
   registered: "This account is not registered."
+  block: "Too many tries!"

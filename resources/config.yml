@@ -20,8 +20,11 @@ forceSingleSession: true
 #Sets the minimum amount of characters to be used when registering a new account
 minPasswordLength: 6
 
-#If enabled, accounts that are using the same IP when logging in again will be automatically authenticated
-authenticateByLastIP: false
+#Will block user after this number of failed attempts. Set to 0 to disable
+blockAfterFail: 6
+
+#If enabled, accounts that are using the same unique id (ip + clientId + name) when logging in again will be automatically authenticated
+authenticateByLastUniqueId: false
 
 #If enabled, will set all the permissions for simleauth.command.register to false
 disableRegister: false
