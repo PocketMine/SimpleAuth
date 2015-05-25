@@ -140,7 +140,7 @@ class SimpleAuth extends PluginBase{
 	}
 
 	public function tryAuthenticatePlayer(Player $player){
-		if($this->isPlayerAuthenticated($player)){
+		if($this->blockPlayers <= 0 and $this->isPlayerAuthenticated($player)){
 			return;
 		}
 
