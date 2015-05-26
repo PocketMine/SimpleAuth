@@ -58,7 +58,7 @@ class EventListener implements Listener{
 		}
 		$this->plugin->deauthenticatePlayer($event->getPlayer());
 		$timer = $this->plugin->getConfig()->get("authenticateTimeout");
-		if($timer !== false){
+		if($timer and $timer > 0){
 			$this->plugin->getServer()->getScheduler()->scheduleDelayedTask(new TimeoutTask($this->plugin,$event->getPlayer()),$timer * 20);
 		}
 	}
