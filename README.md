@@ -31,7 +31,7 @@ You can modify the _SimpleAuth/config.yml_ file on the _plugins_ directory once 
 
 | Configuration | Type | Default | Description |
 | :---: | :---: | :---: | :--- |
-| timeout | integer | 60 | Unauthenticated players will be kicked after this period of time. Set it to 0 to disable. (TODO) |
+| timeout | integer | 60 | Unauthenticated players will be kicked after this period of time. Set it to "false" to disable.  |
 | forceSingleSession | boolean | true | New players won't kick an authenticated player if using the same name. |
 | minPasswordLength | integer | 6 | Minimum length of the register password. |
 | blockAfterFail | integer | 6 | Block clients after several failed attempts |

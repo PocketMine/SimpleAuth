@@ -33,5 +33,4 @@ disableRegister: false
 disableLogin: false
 
 #Number of seconds to wait for a player to be authenticated. If false, disables the timeout
-#TODO
-authenticateTimeout: 120
+authenticateTimeout: 60

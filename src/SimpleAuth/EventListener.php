@@ -33,6 +33,7 @@ use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\Player;
+use SimpleAuth\task\TimeoutTask;
 
 class EventListener implements Listener{
 	/** @var SimpleAuth */
@@ -56,6 +57,10 @@ class EventListener implements Listener{
 			}
 		}
 		$this->plugin->deauthenticatePlayer($event->getPlayer());
+		$timer = $this->plugin->getConfig()->get("authenticateTimeout");
+		if($timer !== false){
+			$this->plugin->getServer()->getScheduler()->scheduleDelayedTask(new TimeoutTask($this->plugin,$event->getPlayer()),$timer * 20);
+		}
 	}
 
 	/**
