@@ -319,7 +319,6 @@ class SimpleAuth extends PluginBase{
 
 						return true;
 					}
-
 					$password = implode(" ", $args);
 
 					if($this->checkPassword($sender, $password)){
