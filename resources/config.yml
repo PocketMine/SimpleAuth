@@ -18,13 +18,13 @@ dataProviderSettings: []
 forceSingleSession: true
 
 #Sets the minimum amount of characters to be used when registering a new account
-minPasswordLength: 6
+minPasswordLength: 8
 
 #Will block user after this number of failed attempts. Set to 0 to disable
-blockAfterFail: 6
+blockAfterFail: 4
 
 #If enabled, accounts that are using the same unique id (ip + clientId + name) when logging in again will be automatically authenticated
-authenticateByLastUniqueId: false
+authenticateByLastUniqueId: true
 
 #If enabled, will set all the permissions for simleauth.command.register to false
 disableRegister: false
@@ -34,4 +34,4 @@ disableLogin: false
 
 #Number of seconds to wait for a player to be authenticated. If false, disables the timeout
 #TODO
-authenticateTimeout: 120
+authenticateTimeout: 80
