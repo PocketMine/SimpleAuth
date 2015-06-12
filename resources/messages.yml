@@ -1,27 +1,27 @@
 # SimpleAuth 1.4.0 language file
 
 join:
- message1: "This server requires account registration."
- message2: "You must authenticate to play."
- register: "Please register using: /register <password>"
- login: "Please log in using: /login <password>"
- popup: "You are not logged in"
+ message1: "Welcome to JFlexCraft. We currently are using JFlexAuth version 1.0 for our server."
+ message2: "You are requested to register or login before you enter the fun!"
+ register: "Please register by typing in the chat: /register <your desired password> You have 80 seconds to do this."
+ login: "Please login to the server by typing in the chat: /login <your password when you registered> You have 80 seconds to do this."
+ popup: "You are not logged in. Please login to continue."
 
 register:
  usage: "/register <password>"
- description: "Registers an account"
- permission: "You do not have permission to use the register command!"
+ description: "Registers an JFlexCraft account"
+ permission: "You do not have permission to use the register command. Please contact the owner."
  error:
   password: "Your password is too short!"
-  registered: "This account is already registered."
-  general: "Error during authentication."
+  registered: "This account is already registered. Please logout of the server and change your username."
+  general: "Error has been ocurred during authentication."
 
 login:
  usage: "/login <password>"
- description: "Logs into an account"
- permission: "You do not have permission to use the login command!"
- success: "You have been authenticated."
+ description: "Logs into a JFlexCraft account"
+ permission: "You do not have permission to use the login command. Please contact te owner."
+ success: "You have been authenticated. Have fun on JFlexCraft!!!"
  error:
-  password: "Incorrect password!"
-  registered: "This account is not registered."
-  block: "Too many tries!"
+  password: "Your password is wrong."
+  registered: "This account is not registered. Please check."
+  block: "Too many tries! You are now IP-Banned for hacking."
