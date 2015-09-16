@@ -30,6 +30,7 @@ use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\event\player\PlayerKickEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\Player;
@@ -50,7 +51,7 @@ class EventListener implements Listener{
 	public function onPlayerJoin(PlayerJoinEvent $event){
 		if($this->plugin->getConfig()->get("authenticateByLastUniqueId") === true and $event->getPlayer()->hasPermission("simpleauth.lastid")){
 			$config = $this->plugin->getDataProvider()->getPlayer($event->getPlayer());
-			if($config !== null and $config["lastip"] === $event->getPlayer()->getUniqueId()){
+			if($config !== null and $config["lastip"] === $event->getPlayer()->getUniqueId()->toString()){
 				$this->plugin->authenticatePlayer($event->getPlayer());
 				return;
 			}
@@ -148,6 +149,15 @@ class EventListener implements Listener{
 		if(!$this->plugin->isPlayerAuthenticated($event->getPlayer())){
 			$event->setCancelled(true);
 		}
+	}
+
+	/**
+	 * @param PlayerKickEvent $event
+	 *
+	 * @priority MONITOR
+	 */
+	public function onPlayerKick(PlayerKickEvent $event){
+	    $this->plugin->closePlayer($event->getPlayer());
 	}
 
 	/**
