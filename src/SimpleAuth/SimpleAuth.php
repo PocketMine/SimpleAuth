@@ -41,7 +41,7 @@ use SimpleAuth\task\ShowMessageTask;
 class SimpleAuth extends PluginBase{
 
 	/** @var PermissionAttachment[] */
-	protected $needAuth = [];
+	protected $needAuth = array();
 
 	/** @var EventListener */
 	protected $listener;
@@ -50,10 +50,10 @@ class SimpleAuth extends PluginBase{
 	protected $provider;
 
 	protected $blockPlayers = 6;
-	protected $blockSessions = [];
+	protected $blockSessions = array();
 
 	/** @var string[] */
-	protected $messages = [];
+	protected $messages = array();
 
 	protected $messageTask = null;
 
@@ -101,7 +101,7 @@ class SimpleAuth extends PluginBase{
 			$player->removeAttachment($attachment);
 			unset($this->needAuth[spl_object_hash($player)]);
 		}
-		$this->provider->updatePlayer($player, $player->getUniqueId(), time());
+		$this->provider->updatePlayer($player, $player->getUniqueId()->toString(), time());
 		$player->sendMessage(TextFormat::GREEN . $this->getMessage("login.success"));
 
 		$this->getMessageTask()->removePlayer($player);
@@ -145,7 +145,7 @@ class SimpleAuth extends PluginBase{
 		}
 
 		if(count($this->blockSessions) > 2048){
-			$this->blockSessions = [];
+			$this->blockSessions = array();
 		}
 
 		if(!isset($this->blockSessions[$player->getAddress()])){
@@ -220,8 +220,8 @@ class SimpleAuth extends PluginBase{
 	/* -------------------------- Non-API part -------------------------- */
 
 	public function closePlayer(Player $player){
+	    $this->getMessageTask()->removePlayer($player);
 		unset($this->needAuth[spl_object_hash($player)]);
-		$this->getMessageTask()->removePlayer($player);
 	}
 
 	public function sendAuthenticateMessage(Player $player){
@@ -298,7 +298,7 @@ class SimpleAuth extends PluginBase{
 	}
 
 	private function parseMessages(array $messages){
-		$result = [];
+		$result = array();
 		foreach($messages as $key => $value){
 			if(is_array($value)){
 				foreach($this->parseMessages($value) as $k => $v){
@@ -322,7 +322,8 @@ class SimpleAuth extends PluginBase{
 
 		$this->saveResource("messages.yml", false);
 
-		$messages = (new Config($this->getDataFolder() . "messages.yml"))->getAll();
+		$messagesConfig = new Config($this->getDataFolder() . "messages.yml");
+		$messages = $messagesConfig->getAll();
 
 		$this->messages = $this->parseMessages($messages);
 
@@ -377,7 +378,7 @@ class SimpleAuth extends PluginBase{
 		$this->getServer()->getPluginManager();
 		$this->provider->close();
 		$this->messageTask = null;
-		$this->blockSessions = [];
+		$this->blockSessions = array();
 	}
 
 	public static function orderPermissionsCallback($perm1, $perm2){
@@ -406,7 +407,7 @@ class SimpleAuth extends PluginBase{
 	}
 
 	protected function removePermissions(PermissionAttachment $attachment){
-		$permissions = [];
+		$permissions = array();
 		foreach($this->getServer()->getPluginManager()->getPermissions() as $permission){
 			$permissions[$permission->getName()] = false;
 		}
