@@ -19,10 +19,10 @@ Plugin for PocketMine-MP that prevents people to impersonate an account, requeri
 ## Commands
 
 
-* `/login <password>`
-* `/register <password>`
-* `/unregister <password>` (TODO)
-* For OPs: `/simpleauth <command: help|unregister> [parameters...]` (TODO)
+* `/login <password>`Log into your account
+* `/register <password>`register
+* `
+* For OPs: `/oplogin`log in as op
 
 
 ## Configuration
