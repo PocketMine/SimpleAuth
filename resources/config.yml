@@ -32,6 +32,5 @@ disableRegister: false
 #If enabled, will set all the permissions for simleauth.command.login to false
 disableLogin: false
 
-#Number of seconds to wait for a player to be authenticated. If false, disables the timeout
-#TODO
-authenticateTimeout: 120
+#Number of seconds to wait for a player to be authenticated. If 0 or -1, disables the timeout
+authenticateTimeout: 60
