@@ -25,3 +25,10 @@ login:
   password: "Incorrect password!"
   registered: "This account is not registered."
   block: "Too many tries!"
+  ingame: "This command only works in-game."
+
+simpleauth:
+ unregistered: "%s unregistered"
+ notregistered: "You are no longer registered!"
+ error:
+  unregister: "Unable to unregister %s"
