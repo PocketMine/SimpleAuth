@@ -5,7 +5,7 @@ api: 2.0.0
 load: STARTUP
 author: PocketMine Team
 authors: [shoghicp]
-description: Prevents people to impersonate an account, requering registration and login when connecting.
+description: Prevents people to impersonate an account, requiring registration and login when connecting.
 website: https://github.com/PocketMine/SimpleAuth
 commands:
  login:
