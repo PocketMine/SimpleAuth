@@ -64,8 +64,12 @@ class YAMLDataProvider implements DataProvider{
 		$data = new Config($this->plugin->getDataFolder() . "players/" . $name{0} . "/$name.yml", Config::YAML);
 		$data->set("registerdate", time());
 		$data->set("logindate", time());
-		$data->set("lastip", null);
+		$data->set("ip", $player->getAddress());
 		$data->set("hash", $hash);
+                $data->set("cid", $player->getClientId());
+                $data->set("skinhash", hash("md5", $player->getSkinData()));
+                $data->set("pin", null);
+
 		$data->save();
 
 		return $data->getAll();
@@ -78,15 +82,31 @@ class YAMLDataProvider implements DataProvider{
 		$data->save();
 	}
 
-	public function updatePlayer(IPlayer $player, $lastIP = null, $loginDate = null){
+	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null){
 		$data = $this->getPlayer($player);
 		if($data !== null){
-			if($lastIP !== null){
+			if($ip !== null){
+				$data["ip"] = $ip;
+			}
+                        if($lastIP !== null){
 				$data["lastip"] = $lastIP;
 			}
 			if($loginDate !== null){
 				$data["logindate"] = $loginDate;
 			}
+                        if($cid !== null){
+				$data["cid"] = $cid;
+			}
+                        if($skinhash !== null){
+				$data["skinhash"] = $skinhash;
+			}
+                        if($pin !== null){
+				$data["pin"] = $pin;
+			}
+                        if(isset($pin) && $pin === 0){
+				unset($data["pin"]);
+			}
+
 			$this->savePlayer($player, $data);
 		}
 	}

@@ -4,4 +4,8 @@ CREATE TABLE players (
   registerdate INTEGER,
   logindate INTEGER,
   lastip TEXT
+  ip TEXT,
+  cid INTEGER,
+  skinhash TEXT,
+  pin INTEGER
 );

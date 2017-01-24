@@ -3,5 +3,9 @@ CREATE TABLE IF NOT EXISTS simpleauth_players (
   hash CHAR(128),
   registerdate INT,
   logindate INT,
-  lastip VARCHAR(50)
+  lastip VARCHAR(50),
+  ip VARCHAR(50),
+  cid BIGINT,
+  skinhash VARCHAR(50),
+  pin INT
 );

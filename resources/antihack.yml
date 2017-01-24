@@ -1,0 +1,31 @@
+# AntiHack config for SimpleAuth2
+
+#Enable antihack
+enabled: false
+
+#Enable LOGIN protection ONLY for PurePerms SuperAdmin ranks (and OP if enabled)
+protectsuperadmins: true
+
+#Enable LOGIN protection for OPs
+protectops: true
+
+#Threat Level: 1) Low 2) Medium 3) High
+#How many out of IP, CID and SKIN must be the same to allow unrestricted access
+threat: 2
+
+pinregister: "PLEASE KEEP THIS SECURITY PIN CODE SAFE: "
+pintext: "SCREENSHOT THIS PIN FOR ACCOUNT RECOVERY: "
+pinerror: "PIN ERROR: PLEASE CONTACT STAFF"
+pinchanged: "YOUR SECURITY PIN CODE HAS CHANGED: "
+pinunchanged: "YOUR SECURITY PIN CODE HAS NOT CHANGED: "
+pinreset: "Security data reset for: "
+
+pinhelp1: "You were given your PIN CODE when you registered"
+pinhelp2: "If you have problems please contact staff"
+pinhelp3: "Or ask STAFF to reset your PIN"
+pinhelp4: "For your security, now type <password> <PIN> (with a space)"
+
+hackwarning: "SUSPICIOUS ACTIVITY FOR PLAYER: "
+consolehelp: "Type /login <player> to reset security checks for a player"
+noplayer : "Player Not Found!"
+

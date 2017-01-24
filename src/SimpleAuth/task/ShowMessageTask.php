@@ -39,11 +39,13 @@ class ShowMessageTask extends PluginTask{
 	}
 
 	public function addPlayer(Player $player){
-		$this->playerList[$player->getUniqueId()->toString()] = $player;
+		$this->playerList[spl_object_hash($player->getUniqueId())] = $player;
 	}
 
 	public function removePlayer(Player $player){
-		unset($this->playerList[$player->getUniqueId()->toString()]);
+	if (null !== $player->getUniqueId()){
+		$this->playerList[spl_object_hash($player->getUniqueId())] = null;
+		}
 	}
 
 	public function onRun($currentTick){
@@ -53,6 +55,9 @@ class ShowMessageTask extends PluginTask{
 		}
 
 		foreach($this->playerList as $player){
+			if($player==null){
+				continue;
+			}
 			$player->sendPopup(TextFormat::ITALIC . TextFormat::GRAY . $this->getPlugin()->getMessage("join.popup"));
 		}
 	}
