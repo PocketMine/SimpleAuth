@@ -39,12 +39,12 @@ class ShowMessageTask extends PluginTask{
 	}
 
 	public function addPlayer(Player $player){
-		$this->playerList[spl_object_hash($player->getUniqueId()->toString())] = $player;
+		$this->playerList[spl_object_hash($player->getUniqueId())] = $player;
 	}
 
 	public function removePlayer(Player $player){
 	if (null !== $player->getUniqueId()){
-		$this->playerList[spl_object_hash($player->getUniqueId()->toString())] = null;
+		$this->playerList[spl_object_hash($player->getUniqueId())] = null;
 		}
 	}
 
