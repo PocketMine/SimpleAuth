@@ -296,7 +296,6 @@ class SimpleAuth extends PluginBase{
 
 
                         $this->getLogger()->debug("Current IP: " . $sender->getAddress() . " - Saved IP: " . $data["ip"] . "\n");
-                        $this->getLogger()->debug("Current CID: " . $sender->getClientId() . " - Saved CID: " . $data["cid"] . "\n");
                         $this->getLogger()->debug("Current SKIN: " . (hash("md5", $sender->getSkinData())) . " - Saved Skin: " . $data["skinhash"] . "\n");
 
                         if ($concordance < ($this->antihack["threat"]) && (!(isset($args[1]) && ($data["pin"] == $args[1])))) {
