@@ -1,4 +1,4 @@
---- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/Awzaw/SimpleAuth
+--- # Poggit-CI Manifes
 branches:
 - master
 projects:
