@@ -48,7 +48,7 @@ class ShowMessageTask extends PluginTask{
 		}
 	}
 
-	public function onRun($currentTick){
+	public function onRun(int $currentTick){
 		$plugin = $this->getPlugin();
 		if($plugin->isDisabled()){
 			return;

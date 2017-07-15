@@ -247,7 +247,7 @@ class SimpleAuth extends PluginBase{
 		}
 	}
 
-    public function onCommand(CommandSender $sender, Command $command, $label, array $args) {
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
         switch ($command->getName()) {
             case "login":
                 if ($sender instanceof Player) {
