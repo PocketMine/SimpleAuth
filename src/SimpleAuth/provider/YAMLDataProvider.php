@@ -18,6 +18,7 @@
 namespace SimpleAuth\provider;
 
 use pocketmine\IPlayer;
+use pocketmine\Player;
 use pocketmine\utils\Config;
 use SimpleAuth\SimpleAuth;
 
@@ -66,9 +67,10 @@ class YAMLDataProvider implements DataProvider{
 		$data->set("logindate", time());
 		$data->set("ip", $player->getAddress());
 		$data->set("hash", $hash);
-                $data->set("cid", $player->getClientId());
-                $data->set("skinhash", hash("md5", $player->getSkinData()));
-                $data->set("pin", null);
+        $data->set("cid", $player->getClientId());
+        $data->set("skinhash", hash("md5", $player->getSkinData()));
+        $data->set("pin", null);
+        $data->set("linkedign", null);
 
 		$data->save();
 
@@ -82,7 +84,7 @@ class YAMLDataProvider implements DataProvider{
 		$data->save();
 	}
 
-	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null){
+	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedign = null){
 		$data = $this->getPlayer($player);
 		if($data !== null){
 			if($ip !== null){
@@ -103,6 +105,9 @@ class YAMLDataProvider implements DataProvider{
                         if($pin !== null){
 				$data["pin"] = $pin;
 			}
+            if($linkedign !== null){
+                $data["linkedign"] = $linkedign;
+            }
                         if(isset($pin) && $pin === 0){
 				unset($data["pin"]);
 			}
@@ -110,6 +115,14 @@ class YAMLDataProvider implements DataProvider{
 			$this->savePlayer($player, $data);
 		}
 	}
+
+    public function getLinked(Player $player) {
+        $data = $this->getPlayer($player);
+        if($data["linkedign"] !== null){
+            return $data["linkedign"];
+        }
+        return null;
+    }
 
 	public function close(){
 

@@ -21,6 +21,7 @@ use pocketmine\Player;
 use pocketmine\scheduler\PluginTask;
 use pocketmine\utils\TextFormat;
 use SimpleAuth\SimpleAuth;
+use pocketmine\plugin\Plugin;
 
 class ShowMessageTask extends PluginTask{
 
@@ -34,7 +35,7 @@ class ShowMessageTask extends PluginTask{
 	/**
 	 * @return SimpleAuth
 	 */
-	public function getPlugin(){
+	public function getPlugin() : Plugin{
 		return $this->owner;
 	}
 

@@ -50,7 +50,7 @@ class DummyDataProvider implements DataProvider{
 
 	}
 
-	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null){
+	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedIGN = null){
 
 	}
 

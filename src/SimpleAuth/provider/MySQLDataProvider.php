@@ -18,6 +18,8 @@
 namespace SimpleAuth\provider;
 
 use pocketmine\IPlayer;
+use pocketmine\Server;
+use pocketmine\Player;
 use SimpleAuth\SimpleAuth;
 use SimpleAuth\task\MySQLPingTask;
 
@@ -49,6 +51,11 @@ class MySQLDataProvider implements DataProvider{
 
 		$resource = $this->plugin->getResource("mysql.sql");
 		$this->database->query(stream_get_contents($resource));
+		//UPDATE DB if necessary for XBL
+        if (!$this->database->query("SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'simpleauth_players' AND COLUMN_NAME = 'linkedign'")){
+            $this->database->query("ALTER TABLE 'simpleauth_players' ADD COLUMN 'linkedign' VARCHAR(16)");
+        }
+
 		fclose($resource);
 
 		$this->plugin->getServer()->getScheduler()->scheduleRepeatingTask(new MySQLPingTask($this->plugin, $this->database), 600); //Each 30 seconds
@@ -83,6 +90,7 @@ class MySQLDataProvider implements DataProvider{
 
     public function registerPlayer(IPlayer $player, $hash) {
         $name = trim(strtolower($player->getName()));
+        $player = Server::getInstance()->getPlayer($player->getName());
         $data = [
             "registerdate" => time(),
             "logindate" => time(),
@@ -91,7 +99,8 @@ class MySQLDataProvider implements DataProvider{
             "ip" => $player->getAddress(),
             "cid" => $player->getClientId(),
             "skinhash" => hash("md5", $player->getSkinData()),
-            "pin" => null
+            "pin" => null,
+            "linkedign" => null
         ];
 
 
@@ -109,7 +118,7 @@ class MySQLDataProvider implements DataProvider{
         $this->database->query("UPDATE simpleauth_players SET ip = '" . $this->database->escape_string($config["ip"]) . "', cid = ". $config["cid"] . ", skinhash = '" . $this->database->escape_string($config["skinhash"]) . "', pin = " . intval($config["pin"]) . ", registerdate = " . intval($config["registerdate"]) . ", logindate = " . intval($config["logindate"]) . ", lastip = '" . $this->database->escape_string($config["lastip"]) . "', hash = '" . $this->database->escape_string($config["hash"]) . "' WHERE name = '" . $this->database->escape_string($name) . "'");
     }
 
-    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null) {
+    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedign = null) {
         $name = trim(strtolower($player->getName()));
         if ($lastIP !== null) {
             $this->database->query("UPDATE simpleauth_players SET lastip = '" . $this->database->escape_string($lastIP) . "' WHERE name = '" . $this->database->escape_string($name) . "'");
@@ -129,11 +138,20 @@ class MySQLDataProvider implements DataProvider{
         if ($pin !== null) {
             $this->database->query("UPDATE simpleauth_players SET pin = " . intval($pin) . " WHERE name = '" . $this->database->escape_string($name) . "'");
         }
+        if ($linkedign !== null) {
+            $this->database->query("UPDATE simpleauth_players SET linkedign = " . $this->database->escape_string($linkedign) . " WHERE name = '" . $this->database->escape_string($name) . "'");
+        }
             if (isset($pin) && (intval($pin) === 0)) {
             $this->database->query("UPDATE simpleauth_players SET pin = NULL WHERE name = '" . $this->database->escape_string($name) . "'");
         }
 
     }
+
+    public function getLinked(Player $player) {
+        $name = trim(strtolower($player->getName()));
+        $linked = $this->database->query("SELECT linkedign FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'");
+        return $linked;
+	}
 
 	public function close(){
 		$this->database->close();

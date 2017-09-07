@@ -116,7 +116,7 @@ class SQLite3DataProvider implements DataProvider{
         $prepare->execute();
     }
 
-    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null) {
+    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedIGN = null) {
         $name = trim(strtolower($player->getName()));
         if ($lastIP !== null) {
             $prepare = $this->database->prepare("UPDATE players SET lastip = :lastip WHERE name = :name");
@@ -152,6 +152,12 @@ class SQLite3DataProvider implements DataProvider{
             $prepare = $this->database->prepare("UPDATE players SET pin = :pin WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":pin", $pin, SQLITE3_INTEGER);
+            $prepare->execute();
+        }
+        if ($linkedIGN !== null) {
+            $prepare = $this->database->prepare("UPDATE players SET linkedign = :$linkedIGN WHERE name = :name");
+            $prepare->bindValue(":name", $name, SQLITE3_TEXT);
+            $prepare->bindValue(":linkedIGN", $linkedIGN, SQLITE3_TEXT);
             $prepare->execute();
         }
 

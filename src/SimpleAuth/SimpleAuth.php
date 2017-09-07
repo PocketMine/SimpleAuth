@@ -185,8 +185,8 @@ class SimpleAuth extends PluginBase{
                 return true;
 
             $pin = mt_rand(1000, 9999);
-            $this->provider->updatePlayer($player, $player->getUniqueId()->toString(), $player->getAddress(), time(), $player->getClientId(), hash("md5", $player->getSkinData()), $pin);
-            $player->sendMessage(TEXTFORMAT::AQUA . $this->antihack["pinregister"] . TEXTFORMAT::WHITE . $pin);
+            $this->provider->updatePlayer($player->getPlayer(), $player->getPlayer()->getUniqueId()->toString(), $player->getPlayer()->getAddress(), time(), $player->getPlayer()->getClientId(), hash("md5", $player->getPlayer()->getSkinData()), $pin);
+            $player->getPlayer()->sendMessage(TEXTFORMAT::AQUA . $this->antihack["pinregister"] . TEXTFORMAT::WHITE . $pin);
             return true;
         }
         return false;

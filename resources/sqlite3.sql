@@ -7,5 +7,6 @@ CREATE TABLE players (
   ip TEXT,
   cid INTEGER,
   skinhash TEXT,
-  pin INTEGER
+  pin INTEGER,
+  linkedign TEXT
 );

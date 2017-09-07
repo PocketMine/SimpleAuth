@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS simpleauth_players (
   ip VARCHAR(50),
   cid BIGINT,
   skinhash VARCHAR(50),
-  pin INT
+  pin INT,
+  linkedign VARCHAR(16)
 );

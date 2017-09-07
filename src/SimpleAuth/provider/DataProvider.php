@@ -61,7 +61,7 @@ interface DataProvider{
 	 * @param string  $lastId
 	 * @param int     $loginDate
 	 */
-	public function updatePlayer(IPlayer $player, $lastId = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null);
+	public function updatePlayer(IPlayer $player, $lastId = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedign = null);
 
 	public function close();
 }
