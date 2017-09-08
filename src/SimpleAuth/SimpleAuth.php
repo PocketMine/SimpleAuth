@@ -264,7 +264,7 @@ class SimpleAuth extends PluginBase{
     }
 
 	public function sendAuthenticateMessage(Player $player){
-		$config = $this->provider->getPlayer($player);
+		$config = $this->provider->getPlayer($player->getName());
 		$player->sendMessage(TextFormat::ITALIC . TextFormat::GRAY . $this->getMessage("join.message1"));
 		$player->sendMessage(TextFormat::ITALIC . TextFormat::GRAY . $this->getMessage("join.message2"));
 		if($config === null){
@@ -288,14 +288,14 @@ class SimpleAuth extends PluginBase{
                         return true;
                     }
 
-                    if (!$this->isPlayerRegistered($sender) or ( $data = $this->provider->getPlayer($sender)) === null) {
+                    if (!$this->isPlayerRegistered($sender) or ( $data = $this->provider->getPlayer($sender->getName())) === null) {
                         $sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.registered"));
                         return true;
                     }
 
                     $password = $args[0];
 
-                    $data = $this->provider->getPlayer($sender);
+                    $data = $this->provider->getPlayer($sender->getName());
                     $superadmin = false;
 
                     if (isset($this->purePerms)) {
@@ -359,7 +359,7 @@ class SimpleAuth extends PluginBase{
                         } else {
                             //ALL GOOD...
                             $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), $sender->getClientId(), hash("md5", $sender->getSkinData()), null);
-                            $data = $this->provider->getPlayer($sender);
+                            $data = $this->provider->getPlayer($sender->getName());
                             $pin = $data["pin"];
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinunchanged"] . TEXTFORMAT::WHITE . $pin);
                         }
