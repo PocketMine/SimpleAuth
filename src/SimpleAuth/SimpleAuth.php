@@ -126,7 +126,9 @@ class SimpleAuth extends PluginBase{
 
                 $player->setDisplayName($linkedPlayerName);
                 $player->setNameTag($linkedPlayerName);
-                $player->setName($linkedPlayerName);
+                if (method_exists($player, 'setName')) {
+                    $player->setName($linkedPlayerName);
+                }
             }
         }
 
@@ -453,9 +455,11 @@ class SimpleAuth extends PluginBase{
                 }
                 $xboxIGN = $this->getDataProvider()->unlinkXBL($sender);
                 if ($xboxIGN !== null) {
-                    $sender->setName($xboxIGN);
                     $sender->setDisplayName($xboxIGN);
                     $sender->setNameTag($xboxIGN);
+                    if (method_exists($sender, 'setName'))  {
+                        $sender->setName($xboxIGN);
+                    }
                     $sender->sendMessage(TextFormat::AQUA . $this->getMessage("link.unlink"));
                 } else {
                     $sender->sendMessage(TextFormat::RED . $this->getMessage("link.unlinkerror"));
