@@ -25,3 +25,9 @@ login:
   password: "Incorrect password!"
   registered: "This account is not registered."
   block: "Too many tries!"
+
+link:
+ success: "You have linked your accounts. Type /unlink to unlink"
+ error: "There was a problem linking the accounts"
+ unlink: "You have unlinked your accounts"
+ unlinkerror: "There was a problem unlinking your accounts"

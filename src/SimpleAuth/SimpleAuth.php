@@ -112,6 +112,24 @@ class SimpleAuth extends PluginBase{
 
 		unset($this->blockSessions[$player->getAddress() . ":" . strtolower($player->getName())]);
 
+        $linkedPlayerName = $this->getDataProvider()->getLinked($ev->getPlayer()->getName());
+        if (isset($linkedPlayerName)) {
+            $pmdata = $this->getDataProvider()->getPlayer($linkedPlayerName);
+            if (isset($pmdata)) {
+                $player = $ev->getPlayer();
+                $player->namedtag = Server::getInstance()->getOfflinePlayerData($linkedPlayerName);
+                if (!isset($player->namedtag->NameTag)) {
+                    $player->namedtag->NameTag = new StringTag("NameTag", $linkedPlayerName);
+                } else {
+                    $player->namedtag["NameTag"] = $linkedPlayerName;
+                }
+
+                $player->setDisplayName($linkedPlayerName);
+                $player->setNameTag($linkedPlayerName);
+                $player->setName($linkedPlayerName);
+            }
+        }
+
 		return true;
 	}
 
@@ -235,6 +253,15 @@ class SimpleAuth extends PluginBase{
 		unset($this->needAuth[spl_object_hash($player)]);
 		$this->getMessageTask()->removePlayer($player);
 	}
+
+    protected function checkPassword($pl, $password) {
+        $data = $this->getDataProvider()->getPlayer($pl->getName());
+        if ($data === null) {
+            return false;
+        }
+        $passok = hash_equals($data["hash"], $this->hash(strtolower($pl->getName()), $password));
+        return $passok;
+    }
 
 	public function sendAuthenticateMessage(Player $player){
 		$config = $this->provider->getPlayer($player);
@@ -395,7 +422,49 @@ class SimpleAuth extends PluginBase{
 					return true;
 				}
 				break;
-		}
+
+            case "link":
+                if (!($sender instanceof Player) or count($args) !== 2) return false;
+                $oldIGN = $args[0];
+                $oldPWD = $args[1];
+                if (!method_exists($this->getDataProvider(), "getLinked")) {
+                    $sender->sendMessage(TextFormat::AQUA . "Please update SimpleAuth to link IGNs");
+                    return true;
+                }
+
+                $oldPlayer = Server::getInstance()->getOfflinePlayer($oldIGN);
+                if ($this->checkPassword($oldPlayer, $oldPWD)) {
+                    $this->getDataProvider()->linkXBL($sender, $oldPlayer, $oldIGN);
+                    $sender->setName($oldIGN);
+                    $sender->setDisplayName($oldIGN);
+                    $sender->setNameTag($oldIGN);
+                    $sender->sendMessage(TextFormat::AQUA . $this->getMessage("link.success"));
+                    return true;
+                }
+                $sender->sendMessage(TextFormat::RED . $this->getMessage("link.error"));
+                return false;
+                break;
+
+            case "unlink":
+                if (!($sender instanceof Player)) return false;
+                if (!method_exists($this->getDataProvider(), "unlinkXBL")) {
+                    $sender->sendMessage(TextFormat::AQUA . "Please update SimpleAuth to unlink IGNs");
+                    return true;
+                }
+                $xboxIGN = $this->getDataProvider()->unlinkXBL($sender);
+                if ($xboxIGN !== null) {
+                    $sender->setName($xboxIGN);
+                    $sender->setDisplayName($xboxIGN);
+                    $sender->setNameTag($xboxIGN);
+                    $sender->sendMessage(TextFormat::AQUA . $this->getMessage("link.unlink"));
+                } else {
+                    $sender->sendMessage(TextFormat::RED . $this->getMessage("link.unlinkerror"));
+                    return false;
+                }
+                return true;
+                break;
+
+        }
 
 		return false;
 	}
