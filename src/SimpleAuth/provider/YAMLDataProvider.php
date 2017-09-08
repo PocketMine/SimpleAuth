@@ -18,7 +18,9 @@
 namespace SimpleAuth\provider;
 
 use pocketmine\IPlayer;
+use pocketmine\OfflinePlayer;
 use pocketmine\Player;
+use pocketmine\Server;
 use pocketmine\utils\Config;
 use SimpleAuth\SimpleAuth;
 
@@ -34,8 +36,8 @@ class YAMLDataProvider implements DataProvider{
 		}
 	}
 
-	public function getPlayer(IPlayer $player){
-		$name = trim(strtolower($player->getName()));
+	public function getPlayer(string $name){
+        $name = trim(strtolower($name));
 		if($name === ""){
 			return null;
 		}
@@ -77,15 +79,15 @@ class YAMLDataProvider implements DataProvider{
 		return $data->getAll();
 	}
 
-	public function savePlayer(IPlayer $player, array $config){
-		$name = trim(strtolower($player->getName()));
+	public function savePlayer(string $name, array $config){
+		$name = trim(strtolower($name));
 		$data = new Config($this->plugin->getDataFolder() . "players/" . $name{0} . "/$name.yml", Config::YAML);
 		$data->setAll($config);
 		$data->save();
 	}
 
 	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedign = null){
-		$data = $this->getPlayer($player);
+		$data = $this->getPlayer($player->getName());
 		if($data !== null){
 			if($ip !== null){
 				$data["ip"] = $ip;
@@ -112,17 +114,41 @@ class YAMLDataProvider implements DataProvider{
 				unset($data["pin"]);
 			}
 
-			$this->savePlayer($player, $data);
+			$this->savePlayer($player->getName(), $data);
 		}
 	}
 
-    public function getLinked(Player $player) {
-        $data = $this->getPlayer($player);
-        if($data["linkedign"] !== null){
+    public function getLinked(string $name) {
+        $name = trim(strtolower($name));
+        $data = $this->getPlayer($name);
+        if(isset($data["linkedign"]) && $data["linkedign"] !== ""){
             return $data["linkedign"];
         }
         return null;
     }
+
+    public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN) {
+        $this->updatePlayer($sender, null, null, null, null, null, null, $oldIGN);
+        $this->updatePlayer($oldPlayer, null, null, null, null, null, null, $sender->getName());
+    }
+
+    public function unlinkXBL(Player $player) {
+        $xblIGN = $this->getLinked($player->getName());
+        $pmIGN = $this->getLinked($xblIGN);
+
+        $xbldata = $this->getPlayer($xblIGN);
+        $pmdata = $this->getPlayer($pmIGN);
+
+        if (isset($xblIGN) && $xblIGN !== "" && isset($xbldata) && isset($pmdata)){
+            unset($pmdata["linkedign"]);
+            $this->savePlayer($pmIGN, $pmdata);
+            unset($xbldata["linkedign"]);
+            $this->savePlayer($xblIGN, $xbldata);
+            return $xblIGN;
+        }
+        else return null;
+    }
+
 
 	public function close(){
 

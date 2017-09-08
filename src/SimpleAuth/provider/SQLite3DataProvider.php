@@ -18,6 +18,9 @@
 namespace SimpleAuth\provider;
 
 use pocketmine\IPlayer;
+use pocketmine\OfflinePlayer;
+use pocketmine\Player;
+use pocketmine\Server;
 use SimpleAuth\SimpleAuth;
 
 class SQLite3DataProvider implements DataProvider{
@@ -41,8 +44,8 @@ class SQLite3DataProvider implements DataProvider{
 		}
 	}
 
-	public function getPlayer(IPlayer $player){
-		$name = trim(strtolower($player->getName()));
+	public function getPlayer(string $name){
+		$name = trim(strtolower($name));
 
 		$prepare = $this->database->prepare("SELECT * FROM players WHERE name = :name");
 		$prepare->bindValue(":name", $name, SQLITE3_TEXT);
@@ -101,8 +104,8 @@ class SQLite3DataProvider implements DataProvider{
 		return $data;
 	}
 
-    public function savePlayer(IPlayer $player, array $config) {
-        $name = trim(strtolower($player->getName()));
+    public function savePlayer(string $name, array $config) {
+        $name = trim(strtolower($name));
         $prepare = $this->database->prepare("UPDATE players SET registerdate = :registerdate, logindate = :logindate, lastip = :lastip, hash = :hash, ip = :ip, cid = :cid, skinhash = :skinhash, pin = :pin WHERE name = :name");
         $prepare->bindValue(":name", $name, SQLITE3_TEXT);
         $prepare->bindValue(":registerdate", $config["registerdate"], SQLITE3_INTEGER);
@@ -157,7 +160,7 @@ class SQLite3DataProvider implements DataProvider{
         if ($linkedIGN !== null) {
             $prepare = $this->database->prepare("UPDATE players SET linkedign = :$linkedIGN WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
-            $prepare->bindValue(":linkedIGN", $linkedIGN, SQLITE3_TEXT);
+            $prepare->bindValue(":linkedign", $linkedIGN, SQLITE3_TEXT);
             $prepare->execute();
         }
 
@@ -166,6 +169,28 @@ class SQLite3DataProvider implements DataProvider{
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":pin", NULL, SQLITE3_INTEGER);
             $prepare->execute();
+        }
+    }
+
+    public function getLinked(string $name) {
+        $name = trim(strtolower($name));
+        $linked = $this->database->query("SELECT linkedign FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'")->fetchArray();
+        return isset($linked["linkedign"]) ? $linked["linkedign"] : null;
+    }
+
+    public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN) {
+        $this->updatePlayer($sender, null, null, null, null, null, null, $oldIGN);
+        $this->updatePlayer($oldPlayer, null, null, null, null, null, null, $sender->getName());
+    }
+    public function unlinkXBL(Player $player) {
+        $xblIGN = $this->getLinked($player->getName());
+        $xblPlayer = Server::getInstance()->getOfflinePlayer($xblIGN);
+        if ($xblPlayer instanceof OfflinePlayer) {
+            $this->updatePlayer($player, null, null, null, null, null, null, "");
+            $this->updatePlayer($xblPlayer, null, null, null, null, null, null, "");
+            return $xblIGN;
+        } else {
+            return null;
         }
     }
 
