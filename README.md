@@ -3,7 +3,10 @@
 ### Automatic Hack protection using IP/CID/SKIN and user PIN codes
 
 ### IMPORTANT
+ACCOUNT MAPPING WITH /LINK REQUIRES A PATCHED VERSION OF PMMP POCKETMINE 1.7dev (see below)
+
 TO UPDATE AN EXISTING MySQL DATABASE PLEASE RUN THE FOLLOWING QUERIES. FOR THE CAUTIOUS, STOP YOUR SERVER AND BACKUP THE DATABASE FIRST:
+
 
 * `ALTER TABLE simpleauth.simpleauth_players ADD ip VARCHAR(50);`
 * `ALTER TABLE simpleauth.simpleauth_players ADD cid BIGINT;`
@@ -62,6 +65,8 @@ SimpleAuth2 is compatible with SimpleAuthHelper, and works with any provider: My
 * `/login <password> <PIN>` (If 2 changes detected for a players IP, SKIN or CID since last login)
 * `/register <password>`
 * `/unregister <password>` (TODO)
+* `/link <otherIGN> <otherpassword>`
+* `/unlink`
 * For OPs: `/simpleauth <command: help|unregister> [parameters...]` (TODO)
 * For Console: `/login <player>` to reset hack detection data for a player
 * For Players: `/login` when logged in to get a new PIN code
@@ -102,6 +107,8 @@ You can modify the _SimpleAuth/antihack.yml_ file on the _plugins_ directory onc
 | simpleauth.lastip | true | Allows authenticating using the lastIP when enabled in the config |
 | simpleauth.command.register | true | Allows registering an account |
 | simpleauth.command.login | true | Allows logging into an account |
+| simpleauth.command.link | true | Allows linking an account |
+| simpleauth.command.unlink | true | Allows unlinking an account |
 
 ## For developers
 
@@ -129,3 +136,17 @@ All methods are available through the main plugin object
 
 You can register an instantiated object that implements SimpleAuth\provider\DataProvider to the plugin using the _setDataProvider()_ method
 
+### LINKING ACCOUNTS
+
+You need to add to Player.php, after the function getName() for example:
+
+    /**
+     * Gets the username
+     * @param string $username
+     */
+     
+    public function setName(string $username) {
+        $this->username = $username;
+    }
+
+    
