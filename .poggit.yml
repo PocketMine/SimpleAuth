@@ -1,6 +1,7 @@
 --- # Poggit-CI Manifest
 branches:
 - master
+- account-mapping
 projects:
   SimpleAuth:
     path: ""
