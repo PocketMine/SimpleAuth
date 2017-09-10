@@ -53,10 +53,6 @@ class MySQLDataProvider implements DataProvider{
 		$resource = $this->plugin->getResource("mysql.sql");
 		$this->database->query(stream_get_contents($resource));
 
-        //UPDATE DB if necessary for XBL
-        if (count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) === 0){
-            $this->database->query("ALTER TABLE simpleauth_players ADD COLUMN linkedign VARCHAR(16)");
-        }
 		fclose($resource);
 
 		$this->plugin->getServer()->getScheduler()->scheduleRepeatingTask(new MySQLPingTask($this->plugin, $this->database), 600); //Each 30 seconds
