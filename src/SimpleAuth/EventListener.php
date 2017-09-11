@@ -22,6 +22,7 @@ use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\event\inventory\InventoryPickupItemEvent;
 use pocketmine\event\Listener;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -33,6 +34,7 @@ use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\Player;
+use pocketmine\Server;
 
 class EventListener implements Listener{
 	/** @var SimpleAuth */
@@ -77,6 +79,25 @@ class EventListener implements Listener{
 				} //if other non logged in players are there leave it to the default behaviour
 			}
 		}
+
+        $linkedPlayerName = $this->plugin->getDataProvider()->getLinked($event->getPlayer()->getName());
+        if (isset($linkedPlayerName)) {
+            $pmdata = $this->plugin->getDataProvider()->getPlayer($linkedPlayerName);
+            if (isset($pmdata)) {
+                $player = $event->getPlayer();
+                $player->namedtag = Server::getInstance()->getOfflinePlayerData($linkedPlayerName);
+                if (!isset($player->namedtag->NameTag)) {
+                    $player->namedtag->NameTag = new StringTag("NameTag", $linkedPlayerName);
+                } else {
+                    $player->namedtag["NameTag"] = $linkedPlayerName;
+                }
+                $player->setDisplayName($linkedPlayerName);
+                $player->setNameTag($linkedPlayerName);
+                if (method_exists($player, 'setName')) {
+                    $player->setName($linkedPlayerName);
+                }
+            }
+        }
 
 	}
 

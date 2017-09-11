@@ -18,7 +18,6 @@
 namespace SimpleAuth\provider;
 
 use pocketmine\IPlayer;
-use pocketmine\Server;
 use pocketmine\Player;
 use pocketmine\OfflinePlayer;
 use SimpleAuth\SimpleAuth;
@@ -139,7 +138,7 @@ class MySQLDataProvider implements DataProvider{
         if (isset($pin) && (intval($pin) === 0)) {
             $this->database->query("UPDATE simpleauth_players SET pin = NULL WHERE name = '" . $this->database->escape_string($name) . "'");
         }
-
+        return true;
     }
 
     public function getLinked(string $name) {
@@ -149,9 +148,10 @@ class MySQLDataProvider implements DataProvider{
 	}
 
     public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN) {
-        $this->updatePlayer($sender, null, null, null, null, null, null, $oldIGN);
-        $this->updatePlayer($oldPlayer, null, null, null, null, null, null, $sender->getName());
-    }
+        $success = $this->updatePlayer($sender, null, null, null, null, null, null, $oldIGN);
+        $success = $success && $this->updatePlayer($oldPlayer, null, null, null, null, null, null, $sender->getName());
+        return $success;
+	}
 
     public function unlinkXBL(Player $player) {
         $xblIGN = $this->getLinked($player->getName());
