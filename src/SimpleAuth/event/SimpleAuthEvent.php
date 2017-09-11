@@ -22,10 +22,10 @@ use SimpleAuth\SimpleAuth;
 
 abstract class SimpleAuthEvent extends PluginEvent{
 
-	/**
-	 * @param SimpleAuth $plugin
-	 */
-	public function __construct(SimpleAuth $plugin){
-		parent::__construct($plugin);
-	}
+    /**
+     * @param SimpleAuth $plugin
+     */
+    public function __construct(SimpleAuth $plugin){
+        parent::__construct($plugin);
+    }
 }

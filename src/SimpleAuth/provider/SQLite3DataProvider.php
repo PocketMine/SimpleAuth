@@ -25,59 +25,59 @@ use SimpleAuth\SimpleAuth;
 
 class SQLite3DataProvider implements DataProvider{
 
-	/** @var SimpleAuth */
-	protected $plugin;
+    /** @var SimpleAuth */
+    protected $plugin;
 
-	/** @var \SQLite3 */
-	protected $database;
+    /** @var \SQLite3 */
+    protected $database;
 
 
-	public function __construct(SimpleAuth $plugin){
-		$this->plugin = $plugin;
-		if(!file_exists($this->plugin->getDataFolder() . "players.db")){
-			$this->database = new \SQLite3($this->plugin->getDataFolder() . "players.db", SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
-			$resource = $this->plugin->getResource("sqlite3.sql");
-			$this->database->exec(stream_get_contents($resource));
-			fclose($resource);
-		}else{
-			$this->database = new \SQLite3($this->plugin->getDataFolder() . "players.db", SQLITE3_OPEN_READWRITE);
-		}
-	}
+    public function __construct(SimpleAuth $plugin){
+        $this->plugin = $plugin;
+        if(!file_exists($this->plugin->getDataFolder() . "players.db")){
+            $this->database = new \SQLite3($this->plugin->getDataFolder() . "players.db", SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
+            $resource = $this->plugin->getResource("sqlite3.sql");
+            $this->database->exec(stream_get_contents($resource));
+            fclose($resource);
+        }else{
+            $this->database = new \SQLite3($this->plugin->getDataFolder() . "players.db", SQLITE3_OPEN_READWRITE);
+        }
+    }
 
-	public function getPlayer(string $name){
-		$name = trim(strtolower($name));
+    public function getPlayer(string $name){
+        $name = trim(strtolower($name));
 
-		$prepare = $this->database->prepare("SELECT * FROM players WHERE name = :name");
-		$prepare->bindValue(":name", $name, SQLITE3_TEXT);
+        $prepare = $this->database->prepare("SELECT * FROM players WHERE name = :name");
+        $prepare->bindValue(":name", $name, SQLITE3_TEXT);
 
-		$result = $prepare->execute();
+        $result = $prepare->execute();
 
-		if($result instanceof \SQLite3Result){
-			$data = $result->fetchArray(SQLITE3_ASSOC);
-			$result->finalize();
-			if(isset($data["name"]) and $data["name"] === $name){
-				unset($data["name"]);
-				$prepare->close();
-				return $data;
-			}
-		}
-		$prepare->close();
+        if($result instanceof \SQLite3Result){
+            $data = $result->fetchArray(SQLITE3_ASSOC);
+            $result->finalize();
+            if(isset($data["name"]) and $data["name"] === $name){
+                unset($data["name"]);
+                $prepare->close();
+                return $data;
+            }
+        }
+        $prepare->close();
 
-		return null;
-	}
+        return null;
+    }
 
-	public function isPlayerRegistered(IPlayer $player){
-		return $this->getPlayer($player) !== null;
-	}
+    public function isPlayerRegistered(IPlayer $player){
+        return $this->getPlayer($player) !== null;
+    }
 
-	public function unregisterPlayer(IPlayer $player){
-		$name = trim(strtolower($player->getName()));
-		$prepare = $this->database->prepare("DELETE FROM players WHERE name = :name");
-		$prepare->bindValue(":name", $name, SQLITE3_TEXT);
-		$prepare->execute();
-	}
+    public function unregisterPlayer(IPlayer $player){
+        $name = trim(strtolower($player->getName()));
+        $prepare = $this->database->prepare("DELETE FROM players WHERE name = :name");
+        $prepare->bindValue(":name", $name, SQLITE3_TEXT);
+        $prepare->execute();
+    }
 
-    public function registerPlayer(IPlayer $player, $hash) {
+    public function registerPlayer(IPlayer $player, $hash){
         $name = trim(strtolower($player->getName()));
         $data = [
             "registerdate" => time(),
@@ -101,10 +101,10 @@ class SQLite3DataProvider implements DataProvider{
         $prepare->bindValue(":pin", $data["pin"], SQLITE3_INTEGER);
         $prepare->execute();
 
-		return $data;
-	}
+        return $data;
+    }
 
-    public function savePlayer(string $name, array $config) {
+    public function savePlayer(string $name, array $config){
         $name = trim(strtolower($name));
         $prepare = $this->database->prepare("UPDATE players SET registerdate = :registerdate, logindate = :logindate, lastip = :lastip, hash = :hash, ip = :ip, cid = :cid, skinhash = :skinhash, pin = :pin WHERE name = :name");
         $prepare->bindValue(":name", $name, SQLITE3_TEXT);
@@ -119,52 +119,52 @@ class SQLite3DataProvider implements DataProvider{
         $prepare->execute();
     }
 
-    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedIGN = null) {
+    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedIGN = null){
         $name = trim(strtolower($player->getName()));
-        if ($lastIP !== null) {
+        if($lastIP !== null){
             $prepare = $this->database->prepare("UPDATE players SET lastip = :lastip WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":lastip", $lastIP, SQLITE3_TEXT);
             $prepare->execute();
         }
-        if ($loginDate !== null) {
+        if($loginDate !== null){
             $prepare = $this->database->prepare("UPDATE players SET logindate = :logindate WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":logindate", $loginDate, SQLITE3_INTEGER);
             $prepare->execute();
         }
-        if ($cid !== null) {
+        if($cid !== null){
             $prepare = $this->database->prepare("UPDATE players SET cid = :cid WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":cid", $cid, SQLITE3_INTEGER);
             $prepare->execute();
         }
-        if ($ip !== null) {
+        if($ip !== null){
             $prepare = $this->database->prepare("UPDATE players SET ip = :ip WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":ip", $ip, SQLITE3_TEXT);
             $prepare->execute();
         }
-        if ($skinhash !== null) {
+        if($skinhash !== null){
             $prepare = $this->database->prepare("UPDATE players SET skinhash = :skinhash WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":skinhash", $skinhash, SQLITE3_TEXT);
             $prepare->execute();
         }
-        if ($pin !== null) {
+        if($pin !== null){
             $prepare = $this->database->prepare("UPDATE players SET pin = :pin WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":pin", $pin, SQLITE3_INTEGER);
             $prepare->execute();
         }
-        if ($linkedIGN !== null) {
+        if($linkedIGN !== null){
             $prepare = $this->database->prepare("UPDATE players SET linkedign = :$linkedIGN WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":linkedign", $linkedIGN, SQLITE3_TEXT);
             $prepare->execute();
         }
 
-        if ($pin === 0) {
+        if($pin === 0){
             $prepare = $this->database->prepare("UPDATE players SET pin = :pin WHERE name = :name");
             $prepare->bindValue(":name", $name, SQLITE3_TEXT);
             $prepare->bindValue(":pin", NULL, SQLITE3_INTEGER);
@@ -173,30 +173,31 @@ class SQLite3DataProvider implements DataProvider{
         return true;
     }
 
-    public function getLinked(string $name) {
+    public function getLinked(string $name){
         $name = trim(strtolower($name));
         $linked = $this->database->query("SELECT linkedign FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'")->fetchArray();
         return isset($linked["linkedign"]) ? $linked["linkedign"] : null;
     }
 
-    public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN) {
+    public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN){
         $success = $this->updatePlayer($sender, null, null, null, null, null, null, $oldIGN);
         $success = $success && $this->updatePlayer($oldPlayer, null, null, null, null, null, null, $sender->getName());
         return $success;
     }
-    public function unlinkXBL(Player $player) {
+
+    public function unlinkXBL(Player $player){
         $xblIGN = $this->getLinked($player->getName());
         $xblPlayer = Server::getInstance()->getOfflinePlayer($xblIGN);
-        if ($xblPlayer instanceof OfflinePlayer) {
+        if($xblPlayer instanceof OfflinePlayer){
             $this->updatePlayer($player, null, null, null, null, null, null, "");
             $this->updatePlayer($xblPlayer, null, null, null, null, null, null, "");
             return $xblIGN;
-        } else {
+        }else{
             return null;
         }
     }
 
-	public function close(){
-		$this->database->close();
-	}
+    public function close(){
+        $this->database->close();
+    }
 }

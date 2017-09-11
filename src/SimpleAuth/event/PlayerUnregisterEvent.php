@@ -22,24 +22,24 @@ use pocketmine\IPlayer;
 use SimpleAuth\SimpleAuth;
 
 class PlayerUnregisterEvent extends SimpleAuthEvent implements Cancellable{
-	public static $handlerList = null;
+    public static $handlerList = null;
 
-	/** @var IPlayer */
-	private $player;
+    /** @var IPlayer */
+    private $player;
 
-	/**
-	 * @param SimpleAuth $plugin
-	 * @param IPlayer    $player
-	 */
-	public function __construct(SimpleAuth $plugin, IPlayer $player){
-		$this->player = $player;
-		parent::__construct($plugin);
-	}
+    /**
+     * @param SimpleAuth $plugin
+     * @param IPlayer $player
+     */
+    public function __construct(SimpleAuth $plugin, IPlayer $player){
+        $this->player = $player;
+        parent::__construct($plugin);
+    }
 
-	/**
-	 * @return IPlayer
-	 */
-	public function getPlayer(){
-		return $this->player;
-	}
+    /**
+     * @return IPlayer
+     */
+    public function getPlayer(){
+        return $this->player;
+    }
 }

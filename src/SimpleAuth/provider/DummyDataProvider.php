@@ -25,49 +25,50 @@ use SimpleAuth\SimpleAuth;
 
 class DummyDataProvider implements DataProvider{
 
-	/** @var SimpleAuth */
-	protected $plugin;
+    /** @var SimpleAuth */
+    protected $plugin;
 
-	public function __construct(SimpleAuth $plugin){
-		$this->plugin = $plugin;
-	}
+    public function __construct(SimpleAuth $plugin){
+        $this->plugin = $plugin;
+    }
 
-	public function getPlayer(string $player){
-		return null;
-	}
+    public function getPlayer(string $player){
+        return null;
+    }
 
-	public function isPlayerRegistered(IPlayer $player){
-		return false;
-	}
+    public function isPlayerRegistered(IPlayer $player){
+        return false;
+    }
 
-	public function registerPlayer(IPlayer $player, $hash){
-		return null;
-	}
+    public function registerPlayer(IPlayer $player, $hash){
+        return null;
+    }
 
-	public function unregisterPlayer(IPlayer $player){
-
-	}
-
-	public function savePlayer(string $name, array $config){
-
-	}
-
-	public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedIGN = null){
-
-	}
-
-    public function getLinked(string $name) {
+    public function unregisterPlayer(IPlayer $player){
 
     }
 
-    public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN) {
-
-    }
-    public function unlinkXBL(Player $player) {
+    public function savePlayer(string $name, array $config){
 
     }
 
-	public function close(){
+    public function updatePlayer(IPlayer $player, $lastIP = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedIGN = null){
 
-	}
+    }
+
+    public function getLinked(string $name){
+
+    }
+
+    public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN){
+
+    }
+
+    public function unlinkXBL(Player $player){
+
+    }
+
+    public function close(){
+
+    }
 }
