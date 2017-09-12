@@ -79,7 +79,7 @@ class YAMLDataProvider implements DataProvider{
         $data->save();
     }
 
-    public function updatePlayer(IPlayer $player, string $lastIP = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedign = null) : bool {
+    public function updatePlayer(IPlayer $player, string $lastIP = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedign = null) : bool{
         $data = $this->getPlayer($player->getName());
         if($data !== null){
             if($ip !== null){
@@ -140,6 +140,9 @@ class YAMLDataProvider implements DataProvider{
         }else return null;
     }
 
+    public function isDBLinkingReady() : bool{
+        return true;
+    }
 
     public function close(){
 

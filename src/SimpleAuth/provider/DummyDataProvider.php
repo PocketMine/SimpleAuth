@@ -52,7 +52,7 @@ class DummyDataProvider implements DataProvider{
 
     }
 
-    public function updatePlayer(IPlayer $player, string $lastIP = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedIGN = null) : bool {
+    public function updatePlayer(IPlayer $player, string $lastIP = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedIGN = null) : bool{
         return false;
     }
 
@@ -66,6 +66,10 @@ class DummyDataProvider implements DataProvider{
 
     public function unlinkXBL(Player $player){
 
+    }
+
+    public function isDBLinkingReady() : bool{
+        return false;
     }
 
     public function close(){

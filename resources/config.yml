@@ -35,3 +35,8 @@ disableLogin: false
 #Number of seconds to wait for a player to be authenticated. If false, disables the timeout
 #TODO
 authenticateTimeout: 120
+
+#If enabled, will allow users to link and unlink accounts
+#Update MySQL with 'ALTER TABLE simpleauth.simpleauth_players ADD linkedign VARCHAR(16);'
+#Update SQLITE3 with 'ALTER TABLE simpleauth.simpleauth_players ADD linkedign TEXT;`
+allowLinking: false

@@ -93,5 +93,10 @@ interface DataProvider{
      */
     public function unlinkXBL(Player $player);
 
+    /**
+     * @return bool for DB supports linking
+     */
+    public function isDBLinkingReady() : bool;
+
     public function close();
 }

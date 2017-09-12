@@ -85,7 +85,7 @@ class MySQLDataProvider implements DataProvider{
         $this->database->query("DELETE FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'");
     }
 
-    public function registerPlayer(IPlayer $player, $hash) {
+    public function registerPlayer(IPlayer $player, $hash){
         $name = trim(strtolower($player->getName()));
         $data = [
             "registerdate" => time(),
@@ -106,7 +106,7 @@ class MySQLDataProvider implements DataProvider{
         $this->database->query("UPDATE simpleauth_players SET ip = '" . $this->database->escape_string($config["ip"]) . "', skinhash = '" . $this->database->escape_string($config["skinhash"]) . "', pin = " . intval($config["pin"]) . ", registerdate = " . intval($config["registerdate"]) . ", logindate = " . intval($config["logindate"]) . ", lastip = '" . $this->database->escape_string($config["lastip"]) . "', hash = '" . $this->database->escape_string($config["hash"]) . "', linkedign = '" . $this->database->escape_string($config["linkedign"]) . "' WHERE name = '" . $this->database->escape_string($name) . "'");
     }
 
-    public function updatePlayer(IPlayer $player, string $lastIp = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedign = null) : bool {
+    public function updatePlayer(IPlayer $player, string $lastIp = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedign = null) : bool{
 
         $name = trim(strtolower($player->getName()));
         if($lastIp !== null){
@@ -134,6 +134,9 @@ class MySQLDataProvider implements DataProvider{
     }
 
     public function getLinked(string $name){
+        if(count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) === 0){
+            return null;
+        }
         $name = trim(strtolower($name));
         $linked = $this->database->query("SELECT linkedign FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'")->fetch_assoc();
         return $linked["linkedign"] ?? null;
@@ -164,6 +167,10 @@ class MySQLDataProvider implements DataProvider{
             }
         }
         return $xblIGN;
+    }
+
+    public function isDBLinkingReady() : bool{
+        return count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) > 0;
     }
 
     public function close(){

@@ -80,7 +80,9 @@ class EventListener implements Listener{
                 } //if other non logged in players are there leave it to the default behaviour
             }
         }
-
+        if(!$this->plugin->getConfig()->get("allowLinking")){
+            return true;
+        }
         $linkedPlayerName = $this->plugin->getDataProvider()->getLinked($event->getPlayer()->getName());
         if(isset($linkedPlayerName)){
             $pmdata = $this->plugin->getDataProvider()->getPlayer($linkedPlayerName);

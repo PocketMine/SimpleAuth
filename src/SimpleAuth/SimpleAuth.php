@@ -57,6 +57,7 @@ class SimpleAuth extends PluginBase{
     protected $messages = [];
     protected $messageTask = null;
     private $antihack = [];
+    private $allowLinking = false;
     private $purePerms;
 
     /**
@@ -247,7 +248,7 @@ class SimpleAuth extends PluginBase{
         }
     }
 
-    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool{
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
         switch($command->getName()){
             case "login":
                 if($sender instanceof Player){
@@ -359,7 +360,8 @@ class SimpleAuth extends PluginBase{
                     $player = $this->getServer()->getOfflinePlayer($args[0]);
 
                     if($player instanceof OfflinePlayer){
-                        $this->updatePin($sender, 0);                        $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinreset"] . $player->getName());
+                        $this->updatePin($sender, 0);
+                        $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinreset"] . $player->getName());
                         return true;
                     }
                     $sender->sendMessage(TextFormat::RED . $this->antihack["noplayer"]);
@@ -401,12 +403,21 @@ class SimpleAuth extends PluginBase{
 
             case "link":
                 if(!($sender instanceof Player) or count($args) !== 2) return false;
-                $oldIGN = $args[0];
-                $oldPWD = $args[1];
                 if(!method_exists($this->getDataProvider(), "getLinked")){
                     $sender->sendMessage(TextFormat::AQUA . "Please update SimpleAuth to link IGNs");
                     return true;
                 }
+                if(!$this->getConfig()->get("allowLinking")){
+                    $sender->sendMessage(TextFormat::AQUA . "Please add 'allowLinking: true' to SimpleAuth config.yml");
+                    return true;
+                }
+                if(($this->getDataProvider() instanceof MySQLDataProvider or $this->getDataProvider() instanceof SQLite3DataProvider) and
+                    !$this->getDataProvider()->isDBLinkingReady()){
+                    $sender->sendMessage(TextFormat::AQUA . "Please update your SimpleAuth DataBase for linking: see config.yml");
+                    return true;
+                }
+                $oldIGN = $args[0];
+                $oldPWD = $args[1];
                 $linked = $this->getDataProvider()->getLinked($sender->getName());
                 if(strtolower($sender->getName()) === strtolower($linked)){
                     $sender->sendMessage(TextFormat::RED . $this->getMessage("link.error") ?? "There was a problem linking the accounts");
@@ -431,6 +442,10 @@ class SimpleAuth extends PluginBase{
                 if(!($sender instanceof Player)) return false;
                 if(!method_exists($this->getDataProvider(), "unlinkXBL")){
                     $sender->sendMessage(TextFormat::AQUA . "Please update SimpleAuth to unlink IGNs");
+                    return true;
+                }
+                if(!$this->getConfig()->get("allowLinking")){
+                    $sender->sendMessage(TextFormat::AQUA . "Please enable 'allowLinking' in SimpleAuth config.yml");
                     return true;
                 }
                 $linked = $this->getDataProvider()->getLinked($sender->getName());
@@ -512,7 +527,7 @@ class SimpleAuth extends PluginBase{
         $loginCommand->setPermissionMessage($this->getMessage("login.permission") ?? "You do not have permission to use the login command!");
 
         $this->blockPlayers = (int)$this->getConfig()->get("blockAfterFail", 6);
-
+        $this->allowLinking = $this->getConfig()->get("allowLinking");
         $provider = $this->getConfig()->get("dataProvider");
         unset($this->provider);
         switch(strtolower($provider)){

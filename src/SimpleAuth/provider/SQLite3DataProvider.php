@@ -156,6 +156,9 @@ class SQLite3DataProvider implements DataProvider{
     }
 
     public function getLinked(string $name){
+        if(count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) === 0){
+            return null;
+        }
         $name = trim(strtolower($name));
         $linked = $this->database->query("SELECT linkedign FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'")->fetchArray();
         return isset($linked["linkedign"]) ? $linked["linkedign"] : null;
@@ -177,6 +180,10 @@ class SQLite3DataProvider implements DataProvider{
         }else{
             return null;
         }
+    }
+
+    public function isDBLinkingReady() : bool {
+        return count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) > 0;
     }
 
     public function close(){
