@@ -35,7 +35,7 @@ class YAMLDataProvider implements DataProvider{
         }
     }
 
-    public function getPlayer(string $name){
+    public function getPlayerData(string $name){
         $name = trim(strtolower($name));
         if($name === ""){
             return null;
@@ -80,7 +80,7 @@ class YAMLDataProvider implements DataProvider{
     }
 
     public function updatePlayer(IPlayer $player, string $lastIP = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedign = null) : bool{
-        $data = $this->getPlayer($player->getName());
+        $data = $this->getPlayerData($player->getName());
         if($data !== null){
             if($ip !== null){
                 $data["ip"] = $ip;
@@ -111,7 +111,7 @@ class YAMLDataProvider implements DataProvider{
 
     public function getLinked(string $name){
         $name = trim(strtolower($name));
-        $data = $this->getPlayer($name);
+        $data = $this->getPlayerData($name);
         if(isset($data["linkedign"]) && $data["linkedign"] !== ""){
             return $data["linkedign"];
         }
@@ -128,8 +128,8 @@ class YAMLDataProvider implements DataProvider{
         $xblIGN = $this->getLinked($player->getName());
         $pmIGN = $this->getLinked($xblIGN);
 
-        $xbldata = $this->getPlayer($xblIGN);
-        $pmdata = $this->getPlayer($pmIGN);
+        $xbldata = $this->getPlayerData($xblIGN);
+        $pmdata = $this->getPlayerData($pmIGN);
 
         if(isset($xblIGN) && $xblIGN !== "" && isset($xbldata) && isset($pmdata)){
             unset($pmdata["linkedign"]);

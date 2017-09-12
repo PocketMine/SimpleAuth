@@ -32,6 +32,9 @@ class MySQLDataProvider implements DataProvider{
     /** @var \mysqli */
     protected $database;
 
+    /** @var  @var bool */
+    private $linkingready;
+
 
     public function __construct(SimpleAuth $plugin){
         $this->plugin = $plugin;
@@ -55,11 +58,13 @@ class MySQLDataProvider implements DataProvider{
 
         fclose($resource);
 
+        $this->linkingready = count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) > 0;
+
         $this->plugin->getServer()->getScheduler()->scheduleRepeatingTask(new MySQLPingTask($this->plugin, $this->database), 600); //Each 30 seconds
         $this->plugin->getLogger()->info("Connected to MySQL server");
     }
 
-    public function getPlayer(string $name){
+    public function getPlayerData(string $name){
         $name = trim(strtolower($name));
 
         $result = $this->database->query("SELECT * FROM simpleauth_players WHERE name = '" . $this->database->escape_string($name) . "'");
@@ -77,7 +82,7 @@ class MySQLDataProvider implements DataProvider{
     }
 
     public function isPlayerRegistered(IPlayer $player){
-        return $this->getPlayer($player->getName()) !== null;
+        return $this->getPlayerData($player->getName()) !== null;
     }
 
     public function unregisterPlayer(IPlayer $player){
@@ -154,13 +159,13 @@ class MySQLDataProvider implements DataProvider{
         if(!isset($xblIGN)){
             return null;
         }
-        $xbldata = $this->getPlayer($xblIGN);
+        $xbldata = $this->getPlayerData($xblIGN);
         if(isset($xblIGN) && isset($xbldata)){
             $xbldata["linkedign"] = "";
             $this->savePlayer($xblIGN, $xbldata);
         }
         if(isset($pmIGN)){
-            $pmdata = $this->getPlayer($pmIGN);
+            $pmdata = $this->getPlayerData($pmIGN);
             if(isset($pmdata)){
                 $pmdata["linkedign"] = "";
                 $this->savePlayer($pmIGN, $pmdata);
@@ -170,7 +175,7 @@ class MySQLDataProvider implements DataProvider{
     }
 
     public function isDBLinkingReady() : bool{
-        return count($this->database->query("SELECT * FROM information_schema.COLUMNS WHERE COLUMN_NAME = 'linkedign'")->fetch_assoc()) > 0;
+        return $this->linkingready;
     }
 
     public function close(){

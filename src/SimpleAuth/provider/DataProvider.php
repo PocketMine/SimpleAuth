@@ -30,7 +30,7 @@ interface DataProvider{
      *
      * @return array, or null if it does not exist
      */
-    public function getPlayer(string $player);
+    public function getPlayerData(string $player);
 
     /**
      * @param IPlayer $player

@@ -32,7 +32,7 @@ class DummyDataProvider implements DataProvider{
         $this->plugin = $plugin;
     }
 
-    public function getPlayer(string $player){
+    public function getPlayerData(string $player){
         return null;
     }
 

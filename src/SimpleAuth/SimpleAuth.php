@@ -229,7 +229,7 @@ class SimpleAuth extends PluginBase{
     }
 
     protected function checkPassword($pl, $password){
-        $data = $this->getDataProvider()->getPlayer($pl->getName());
+        $data = $this->getDataProvider()->getPlayerData($pl->getName());
         if($data === null){
             return false;
         }
@@ -238,7 +238,7 @@ class SimpleAuth extends PluginBase{
     }
 
     public function sendAuthenticateMessage(Player $player){
-        $config = $this->provider->getPlayer($player->getName());
+        $config = $this->provider->getPlayerData($player->getName());
         $player->sendMessage(TextFormat::ITALIC . TextFormat::GRAY . $this->getMessage("join.message1") ?? "This server requires account registration.");
         $player->sendMessage(TextFormat::ITALIC . TextFormat::GRAY . $this->getMessage("join.message2") ?? "You must login to play.");
         if($config === null){
@@ -262,14 +262,14 @@ class SimpleAuth extends PluginBase{
                         return true;
                     }
 
-                    if(!$this->isPlayerRegistered($sender) or ($data = $this->provider->getPlayer($sender->getName())) === null){
+                    if(!$this->isPlayerRegistered($sender) or ($this->provider->getPlayerData($sender->getName())) === null){
                         $sender->sendMessage(TextFormat::RED . $this->getMessage("login.error.registered") ?? "This account is not registered.");
                         return true;
                     }
 
                     $password = $args[0];
 
-                    $data = $this->provider->getPlayer($sender->getName());
+                    $data = $this->provider->getPlayerData($sender->getName());
                     $superadmin = false;
 
                     if(isset($this->purePerms)){
@@ -333,7 +333,7 @@ class SimpleAuth extends PluginBase{
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinchanged"] . TEXTFORMAT::WHITE . $pin);
                         }else{
                             //ALL GOOD...
-                            $data = $this->provider->getPlayer($sender->getName());
+                            $data = $this->provider->getPlayerData($sender->getName());
                             $pin = $data["pin"];
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinunchanged"] . TEXTFORMAT::WHITE . $pin);
                         }
@@ -408,7 +408,7 @@ class SimpleAuth extends PluginBase{
                     return true;
                 }
                 if(!$this->getConfig()->get("allowLinking")){
-                    $sender->sendMessage(TextFormat::AQUA . "Please add 'allowLinking: true' to SimpleAuth config.yml");
+                    $sender->sendMessage(TextFormat::AQUA . "Please set 'allowLinking: true' to SimpleAuth config.yml");
                     return true;
                 }
                 if(($this->getDataProvider() instanceof MySQLDataProvider or $this->getDataProvider() instanceof SQLite3DataProvider) and
@@ -424,8 +424,11 @@ class SimpleAuth extends PluginBase{
                     return false;
                 }
                 $oldPlayer = Server::getInstance()->getOfflinePlayer($oldIGN);
+
                 if($oldPlayer instanceof OfflinePlayer && $this->checkPassword($oldPlayer, $oldPWD)){
+
                     $success = $this->getDataProvider()->linkXBL($sender, $oldPlayer, $oldIGN);
+
                     if($success){
                         $line1 = $this->getMessage("link.success1") ?? "Accounts Linked! Login again with the password for " . $oldIGN;
                         $line2 = $this->getMessage("link.success2") ?? "Use /unlink to unlink these accounts at any time";

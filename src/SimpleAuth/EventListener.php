@@ -52,7 +52,7 @@ class EventListener implements Listener{
      */
     public function onPlayerJoin(PlayerJoinEvent $event){
         if($this->plugin->getConfig()->get("authenticateByLastUniqueId") === true and $event->getPlayer()->hasPermission("simpleauth.lastid")){
-            $config = $this->plugin->getDataProvider()->getPlayer($event->getPlayer());
+            $config = $this->plugin->getDataProvider()->getPlayerData($event->getPlayer());
             if($config !== null and $config["lastip"] === $event->getPlayer()->getUniqueId()->toString()){
                 $this->plugin->authenticatePlayer($event->getPlayer());
                 return;
@@ -85,7 +85,7 @@ class EventListener implements Listener{
         }
         $linkedPlayerName = $this->plugin->getDataProvider()->getLinked($event->getPlayer()->getName());
         if(isset($linkedPlayerName)){
-            $pmdata = $this->plugin->getDataProvider()->getPlayer($linkedPlayerName);
+            $pmdata = $this->plugin->getDataProvider()->getPlayerData($linkedPlayerName);
             if(isset($pmdata)){
                 $player = $event->getPlayer();
                 $player->namedtag = Server::getInstance()->getOfflinePlayerData($linkedPlayerName);
@@ -127,14 +127,13 @@ class EventListener implements Listener{
                 $event->setCancelled(true);
                 $command = substr($message, 1);
                 $args = explode(" ", $command);
-                if (!$this->plugin->getConfig()->get("disableRegister") && $args[0] === "register") {
-                    $this->forcePerms($event->getPlayer());
-                }elseif (!$this->plugin->getConfig()->get("disableLogin") && $args[0] === "login") {
-                    $this->forcePerms($event->getPlayer());
-                }
-
                 if($args[0] === "register" or $args[0] === "login" or $args[0] === "help"){
                     $this->plugin->getServer()->dispatchCommand($event->getPlayer(), $command);
+                    if (!$this->plugin->getConfig()->get("disableRegister") && $args[0] === "register") {
+                        $this->forcePerms($event->getPlayer());
+                    }elseif (!$this->plugin->getConfig()->get("disableLogin") && $args[0] === "login") {
+                        $this->forcePerms($event->getPlayer());
+                    }
                 }else{
                     $this->plugin->sendAuthenticateMessage($event->getPlayer());
                 }

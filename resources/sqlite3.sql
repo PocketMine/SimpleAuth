@@ -3,9 +3,8 @@ CREATE TABLE players (
   hash TEXT,
   registerdate INTEGER,
   logindate INTEGER,
-  lastip TEXT
+  lastip TEXT,
   ip TEXT,
   skinhash TEXT,
-  pin INTEGER,
-  linkedign TEXT
+  pin INTEGER
 );
