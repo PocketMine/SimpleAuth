@@ -39,6 +39,7 @@ use pocketmine\Server;
 class EventListener implements Listener{
     /** @var SimpleAuth */
     private $plugin;
+    private $perms;
 
     public function __construct(SimpleAuth $plugin){
         $this->plugin = $plugin;
@@ -124,6 +125,12 @@ class EventListener implements Listener{
                 $event->setCancelled(true);
                 $command = substr($message, 1);
                 $args = explode(" ", $command);
+                if (!$this->plugin->getConfig()->get("disableRegister") && $args[0] === "register") {
+                    $this->forcePerms($event->getPlayer());
+                }elseif (!$this->plugin->getConfig()->get("disableLogin") && $args[0] === "login") {
+                    $this->forcePerms($event->getPlayer());
+                }
+
                 if($args[0] === "register" or $args[0] === "login" or $args[0] === "help"){
                     $this->plugin->getServer()->dispatchCommand($event->getPlayer(), $command);
                 }else{
@@ -132,6 +139,38 @@ class EventListener implements Listener{
             }elseif(!$event->getPlayer()->hasPermission("simpleauth.chat")){
                 $event->setCancelled(true);
             }
+        }
+    }
+
+    //Borrowed from SimpleAuthHelper
+    private function checkPerm(Player $pl, $perm) {
+        if ($pl->hasPermission($perm)) return;
+        $n = strtolower($pl->getName());
+        $this->plugin->getLogger()->debug("Fixing %1% for %2%", $perm, $n);
+        if (!isset($this->perms[$n])) $this->perms[$n] = $pl->addAttachment($this->plugin);
+        $this->perms[$n]->setPermission($perm,true);
+        $pl->recalculatePermissions();
+    }
+
+    public function forcePerms(Player $player) {
+        if ($this->plugin->isPlayerAuthenticated($player)) {
+            $this->resetPerms($player);
+            return;
+        }
+        if (!$this->plugin->isPlayerRegistered($player)) {
+            $this->checkPerm($player,"simpleauth.command.register");
+            return;
+        }
+        $this->checkPerm($player,"simpleauth.command.login");
+    }
+
+    public function resetPerms(Player $pl) {
+        $n = strtolower($pl->getName());
+        if (isset($this->perms[$n])) {
+            $attach = $this->perms[$n];
+            unset($this->perms[$n]);
+            $pl->removeAttachment($attach);
+            $pl->recalculatePermissions();
         }
     }
 

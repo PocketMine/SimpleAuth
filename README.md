@@ -3,7 +3,7 @@
 #### Automatic Hack protection using IP/UUID/SKIN, user PIN codes and /link, /unlink by Awzaw
 
 #### IMPORTANT
-
+You no longer need to set "hack login" and "hack register" perms with SimpleAuthHelper.
 ACCOUNT MAPPING WITH /LINK REQUIRES A PATCHED VERSION OF PMMP POCKETMINE 1.7dev (see below)
 You must also update the database if you use MySQL or SQLite:
 
