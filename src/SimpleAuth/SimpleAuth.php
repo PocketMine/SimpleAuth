@@ -244,7 +244,8 @@ class SimpleAuth extends PluginBase{
         if($config === null){
             $player->sendMessage(TextFormat::YELLOW . $this->getMessage("join.register") ?? "Please register using: /register <password>");
         }else{
-            $player->sendMessage(TextFormat::YELLOW . $this->getMessage("join.login") ?? "Please log in using: /login <password>");
+            if ($this->allowLinking) $player->sendMessage(TextFormat::YELLOW . ($this->getMessage("join.loggingas") ? $this->getMessage("join.loggingas") .  $player->getName()  : "You are connecting as " . $player->getName()));
+            $player->sendMessage(TextFormat::YELLOW . $this->getMessage("join.login") ?? "Log in using: /login <password>");
         }
     }
 

@@ -6,6 +6,7 @@ join:
  register: "Please register using: /register <password>"
  login: "Please log in using: /login <password>"
  popup: "You are not logged in"
+ loggingas: "You are connecting as "
 
 register:
  usage: "/register <password>"
