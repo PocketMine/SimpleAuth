@@ -60,15 +60,37 @@ interface DataProvider{
 
     /**
      * @param IPlayer $player
-     * @param string $lastId
+     * @param string $lastIp
+     * @param string $ip
      * @param int $loginDate
+     * @param string $skinhash
+     * @param int $pin
+     * @param string $linkedign
+     * @return bool
      */
-    public function updatePlayer(IPlayer $player, $lastId = null, $ip = null, $loginDate = null, $cid = null, $skinhash = null, $pin = null, $linkedign = null);
+    public function updatePlayer(IPlayer $player, string $lastIp = null, string $ip = null, int $loginDate = null, string $skinhash = null, int $pin = null, string $linkedign = null) : bool;
 
+    /**
+     * @param string $name
+     *
+     * @return string or null
+     */
     public function getLinked(string $name);
 
+    /**
+     * @param Player $sender
+     * @param OfflinePlayer $oldPlayer
+     * @param string $oldIGN
+     *
+     * @return bool $success
+     */
     public function linkXBL(Player $sender, OfflinePlayer $oldPlayer, string $oldIGN);
 
+    /**
+     * @param Player $player
+     *
+     * @return string or null if not linked
+     */
     public function unlinkXBL(Player $player);
 
     public function close();

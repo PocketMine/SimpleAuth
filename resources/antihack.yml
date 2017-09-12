@@ -10,7 +10,7 @@ protectsuperadmins: true
 protectops: true
 
 #Threat Level: 1) Low 2) Medium 3) High
-#How many out of IP, CID and SKIN must be the same to allow unrestricted access
+#How many out of IP, UUID and SKIN must be the same to allow unrestricted access
 threat: 2
 
 pinregister: "PLEASE KEEP THIS SECURITY PIN CODE SAFE: "

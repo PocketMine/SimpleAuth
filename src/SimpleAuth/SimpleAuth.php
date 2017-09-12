@@ -104,7 +104,6 @@ class SimpleAuth extends PluginBase{
             unset($this->needAuth[spl_object_hash($player)]);
         }
 
-        $this->provider->updatePlayer($player, $player->getUniqueId()->toString(), $player->getAddress(), time());
         $player->recalculatePermissions();
         $player->sendMessage(TextFormat::GREEN . $this->getMessage("login.success") ?? "You have been authenticated");
 
@@ -178,15 +177,7 @@ class SimpleAuth extends PluginBase{
             if($ev->isCancelled()){
                 return false;
             }
-
             $this->provider->registerPlayer($player, $this->hash(strtolower($player->getName()), $password));
-
-            if(!$this->antihack["enabled"])
-                return true;
-
-            $pin = mt_rand(1000, 9999);
-            $this->provider->updatePlayer($player->getPlayer(), $player->getPlayer()->getUniqueId()->toString(), $player->getPlayer()->getAddress(), time(), $player->getPlayer()->getClientId(), hash("md5", $player->getPlayer()->getSkinData()), $pin);
-            $player->getPlayer()->sendMessage(TEXTFORMAT::AQUA . $this->antihack["pinregister"] . TEXTFORMAT::WHITE . $pin);
             return true;
         }
         return false;
@@ -264,7 +255,7 @@ class SimpleAuth extends PluginBase{
                     if($this->isPlayerAuthenticated($sender)){
                         if($this->antihack["enabled"]){
                             $pin = mt_rand(1000, 9999);
-                            $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), $sender->getClientId(), hash("md5", $sender->getSkinData()), $pin);
+                            $this->updatePin($sender, $pin);
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinchanged"] . TEXTFORMAT::WHITE . $pin);
                         }
                         return true;
@@ -294,18 +285,18 @@ class SimpleAuth extends PluginBase{
 
                     $concordance = 0;
 
-                    if($sender->getAddress() == $data["ip"])
+                    if($sender->getAddress() === $data["ip"])
                         $concordance++;
-                    if($sender->getClientId() == $data["cid"])
+                    if($sender->getPlayer()->getUniqueId()->toString() === $data["lastip"])
                         $concordance++;
                     if(hash("md5", $sender->getSkinData()) == $data["skinhash"])
                         $concordance++;
 
                     if($checkthisrank && isset($data["pin"]) && ($this->antihack["enabled"])){
 
-
                         $this->getLogger()->debug("Current IP: " . $sender->getAddress() . " - Saved IP: " . $data["ip"] . "\n");
                         $this->getLogger()->debug("Current SKIN: " . (hash("md5", $sender->getSkinData())) . " - Saved Skin: " . $data["skinhash"] . "\n");
+                        $this->getLogger()->debug("Current UUID: " . $sender->getPlayer()->getUniqueId()->toString() . " - Saved UUID: " . $data["lastip"] . "\n");
 
                         if($concordance < ($this->antihack["threat"]) && (!(isset($args[1]) && ($data["pin"] == $args[1])))){
 
@@ -322,30 +313,29 @@ class SimpleAuth extends PluginBase{
                     }
 
                     if(hash_equals($data["hash"], $this->hash(strtolower($sender->getName()), $password)) and $this->authenticatePlayer($sender)){
+                        // LOGIN SUCCESS!!
+                        $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), hash("md5", $sender->getSkinData()), null, null);
 
                         if(!$this->antihack["enabled"] || !$checkthisrank)
                             return true;
 
                         if(!isset($data["pin"])){
-
                             $pin = mt_rand(1000, 9999);
-                            $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), $sender->getClientId(), hash("md5", $sender->getSkinData()), $pin);
+                            $this->updatePin($sender, $pin);
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pintext"] . TEXTFORMAT::WHITE . $pin);
 
                             return true;
                         }
                         if($concordance < ($this->antihack["threat"])){
                             $pin = mt_rand(1000, 9999);
-                            $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), $sender->getClientId(), hash("md5", $sender->getSkinData()), $pin);
+                            $this->updatePin($sender, $pin);
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinchanged"] . TEXTFORMAT::WHITE . $pin);
                         }else{
                             //ALL GOOD...
-                            $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), $sender->getClientId(), hash("md5", $sender->getSkinData()), null);
                             $data = $this->provider->getPlayer($sender->getName());
                             $pin = $data["pin"];
                             $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinunchanged"] . TEXTFORMAT::WHITE . $pin);
                         }
-
                         return true;
                     }else{
                         $this->tryAuthenticatePlayer($sender);
@@ -361,7 +351,7 @@ class SimpleAuth extends PluginBase{
                     $player = $this->getServer()->getPlayer($args[0]);
 
                     if($player instanceof Player){
-                        $this->provider->updatePlayer($player, $player->getUniqueId()->toString(), $player->getAddress(), time(), $player->getClientId(), hash("md5", $player->getSkinData()), 0);
+                        $this->updatePin($sender, 0);
                         $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinreset"] . $player->getName());
                         return true;
                     }
@@ -369,8 +359,7 @@ class SimpleAuth extends PluginBase{
                     $player = $this->getServer()->getOfflinePlayer($args[0]);
 
                     if($player instanceof OfflinePlayer){
-                        $this->provider->updatePlayer($player, null, null, null, null, null, 0);
-                        $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinreset"] . $player->getName());
+                        $this->updatePin($sender, 0);                        $sender->sendMessage(TEXTFORMAT::LIGHT_PURPLE . $this->antihack["pinreset"] . $player->getName());
                         return true;
                     }
                     $sender->sendMessage(TextFormat::RED . $this->antihack["noplayer"]);
@@ -379,9 +368,9 @@ class SimpleAuth extends PluginBase{
                 break;
             case "register":
                 if($sender instanceof Player){
+
                     if($this->isPlayerRegistered($sender)){
                         $sender->sendMessage(TextFormat::RED . $this->getMessage("register.error.registered") ?? "This account is already registered.");
-
                         return true;
                     }
 
@@ -392,6 +381,13 @@ class SimpleAuth extends PluginBase{
                     }
 
                     if($this->registerPlayer($sender, $password) and $this->authenticatePlayer($sender)){
+                        $this->provider->updatePlayer($sender, $sender->getUniqueId()->toString(), $sender->getAddress(), time(), hash("md5", $sender->getSkinData()), null, null);
+                        if(!$this->antihack["enabled"])
+                            return true;
+
+                        $pin = mt_rand(1000, 9999);
+                        $this->updatePin($sender, $pin);
+                        $sender->sendMessage(TEXTFORMAT::AQUA . $this->antihack["pinregister"] . TEXTFORMAT::WHITE . $pin);
                         return true;
                     }else{
                         $sender->sendMessage(TextFormat::RED . $this->getMessage("register.error.general") ?? "Error during authentication.");
@@ -439,23 +435,29 @@ class SimpleAuth extends PluginBase{
                 }
                 $linked = $this->getDataProvider()->getLinked($sender->getName());
                 if($linked === null or $linked === ""){
-                    $sender->sendMessage($this->getMessage("link.notlinkederror") ? TextFormat::RED . $this->getMessage("link.notlinkederror") : TextFormat::RED . "Your account is not linked");
+                    $sender->sendMessage($this->getMessage("link.notlinkederror") ? TextFormat::RED
+                        . $this->getMessage("link.notlinkederror") : TextFormat::RED . "Your account is not linked");
                     return false;
                 }
                 $xboxIGN = $this->getDataProvider()->unlinkXBL($sender);
                 if($xboxIGN !== null && $xboxIGN !== ""){
                     $currentIGN = $sender->getName();
                     if(Server::getInstance()->getPlayerExact($xboxIGN) === null){ //user unlinked after linking without relog
-                        $line1 = $this->getMessage("link.unlink1") ? $this->getMessage("link.unlink1") . $xboxIGN : "Account " . $xboxIGN . " unlinked!";
-                        $line2 = $this->getMessage("link.unlink2") ? $this->getMessage("link.unlink2") . $currentIGN : "Login from now on with your regular password for $currentIGN";
+                        $line1 = $this->getMessage("link.unlink1") ? $this->getMessage("link.unlink1")
+                            . $xboxIGN : "Account " . $xboxIGN . " unlinked!";
+                        $line2 = $this->getMessage("link.unlink2") ? $this->getMessage("link.unlink2")
+                            . $currentIGN : "Login from now on with your regular password for $currentIGN";
                     }else{
-                        $line1 = $this->getMessage("link.unlink1") ? $this->getMessage("link.unlink1") . $currentIGN : "Account " . $currentIGN . " unlinked!";
-                        $line2 = $this->getMessage("link.unlink2") ? $this->getMessage("link.unlink2") . $xboxIGN : "Login from now on with your regular password for $xboxIGN";
+                        $line1 = $this->getMessage("link.unlink1") ? $this->getMessage("link.unlink1")
+                            . $currentIGN : "Account " . $currentIGN . " unlinked!";
+                        $line2 = $this->getMessage("link.unlink2") ? $this->getMessage("link.unlink2")
+                            . $xboxIGN : "Login from now on with your regular password for $xboxIGN";
                     }
                     $message = TextFormat::GREEN . $line1 . "\n" . TextFormat::RED . $line2;
                     $sender->sendMessage($message);
                 }else{
-                    $sender->sendMessage($this->getMessage("link.unlinkerror") ? TextFormat::RED . $this->getMessage("link.unlinkerror") : TextFormat::RED . "There was a problem unlinking your accounts");
+                    $sender->sendMessage($this->getMessage("link.unlinkerror") ? TextFormat::RED
+                        . $this->getMessage("link.unlinkerror") : TextFormat::RED . "There was a problem unlinking your accounts");
                     return false;
                 }
                 return true;
@@ -600,18 +602,17 @@ class SimpleAuth extends PluginBase{
         unset($permissions["simpleauth.lastid"]);
 
         //Do this because of permission manager plugins
-        if($this->getConfig()->get("disableRegister") === true){
+        if($this->getConfig()->get("disableRegister") == true){
             $permissions["simpleauth.command.register"] = false;
         }else{
             $permissions["simpleauth.command.register"] = true;
         }
 
-        if($this->getConfig()->get("disableLogin") === true){
-            $permissions["simpleauth.command.register"] = false;
+        if($this->getConfig()->get("disableLogin") == true){
+            $permissions["simpleauth.command.login"] = false;
         }else{
             $permissions["simpleauth.command.login"] = true;
         }
-
         uksort($permissions, [SimpleAuth::class, "orderPermissionsCallback"]); //Set them in the correct order
 
         $attachment->setPermissions($permissions);
@@ -642,5 +643,9 @@ class SimpleAuth extends PluginBase{
         }
 
         return $this->messageTask;
+    }
+
+    private function updatePin(IPlayer $player, $pin){
+        $this->provider->updatePlayer($player, null, null, null, null, $pin, null);
     }
 }
