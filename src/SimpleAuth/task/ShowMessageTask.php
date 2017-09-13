@@ -21,6 +21,7 @@ use pocketmine\Player;
 use pocketmine\scheduler\PluginTask;
 use pocketmine\utils\TextFormat;
 use SimpleAuth\SimpleAuth;
+use pocketmine\plugin\Plugin;
 
 class ShowMessageTask extends PluginTask{
 
@@ -34,7 +35,7 @@ class ShowMessageTask extends PluginTask{
 	/**
 	 * @return SimpleAuth
 	 */
-	public function getPlugin(){
+	public function getPlugin() : Plugin{
 		return $this->owner;
 	}
 
@@ -43,16 +44,21 @@ class ShowMessageTask extends PluginTask{
 	}
 
 	public function removePlayer(Player $player){
+	if (null !== $player->getUniqueId()){
 		unset($this->playerList[$player->getUniqueId()->toString()]);
+		}
 	}
 
-	public function onRun($currentTick){
+	public function onRun(int $currentTick){
 		$plugin = $this->getPlugin();
 		if($plugin->isDisabled()){
 			return;
 		}
 
 		foreach($this->playerList as $player){
+			if($player==null){
+				continue;
+			}
 			$player->sendPopup(TextFormat::ITALIC . TextFormat::GRAY . $this->getPlugin()->getMessage("join.popup"));
 		}
 	}

@@ -22,25 +22,25 @@ use pocketmine\Player;
 use SimpleAuth\SimpleAuth;
 
 class PlayerDeauthenticateEvent extends SimpleAuthEvent implements Cancellable{
-	public static $handlerList = null;
+    public static $handlerList = null;
 
 
-	/** @var Player */
-	private $player;
+    /** @var Player */
+    private $player;
 
-	/**
-	 * @param SimpleAuth $plugin
-	 * @param Player     $player
-	 */
-	public function __construct(SimpleAuth $plugin, Player $player){
-		$this->player = $player;
-		parent::__construct($plugin);
-	}
+    /**
+     * @param SimpleAuth $plugin
+     * @param Player $player
+     */
+    public function __construct(SimpleAuth $plugin, Player $player){
+        $this->player = $player;
+        parent::__construct($plugin);
+    }
 
-	/**
-	 * @return Player
-	 */
-	public function getPlayer(){
-		return $this->player;
-	}
+    /**
+     * @return Player
+     */
+    public function getPlayer(){
+        return $this->player;
+    }
 }

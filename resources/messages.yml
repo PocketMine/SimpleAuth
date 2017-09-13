@@ -2,10 +2,11 @@
 
 join:
  message1: "This server requires account registration."
- message2: "You must authenticate to play."
+ message2: "You must login to play."
  register: "Please register using: /register <password>"
  login: "Please log in using: /login <password>"
  popup: "You are not logged in"
+ loggingas: "You are connecting as "
 
 register:
  usage: "/register <password>"
@@ -25,3 +26,12 @@ login:
   password: "Incorrect password!"
   registered: "This account is not registered."
   block: "Too many tries!"
+
+link:
+ success1: "Accounts Linked! Login from now on with the password for "
+ success2: "Use /unlink to unlink these accounts at any time"
+ error: "There was a problem linking the accounts"
+ unlink1: "You have unlinked your account "
+ unlink2: "Login from now on with the password for "
+ unlinkerror: "There was a problem unlinking your accounts"
+ notlinkederror: "Your account is not linked"

@@ -1,11 +1,11 @@
 name: SimpleAuth
 main: SimpleAuth\SimpleAuth
-version: 1.7.2
-api: 2.0.0
+version: 2.1.0-map.3
+api: [3.0.0-ALPHA7]
 load: STARTUP
 author: PocketMine Team
-authors: [shoghicp]
-description: Prevents people to impersonate an account, requering registration and login when connecting.
+authors: [shoghicp, awzaw]
+description: Prevents people from impersonating an account, requires registration and login when connecting.
 website: https://github.com/PocketMine/SimpleAuth
 commands:
  login:
@@ -16,6 +16,14 @@ commands:
   description: "Registers an account"
   usage: "/register <password>"
   permission: simpleauth.command.register
+ link:
+  description: "Links an account"
+  usage: "/link <other account><other password>"
+  permission: simpleauth.command.link
+ unlink:
+  description: "Unlinks linked accounts"
+  usage: "/unlink"
+  permission: simpleauth.command.unlink
 
 permissions:
  simpleauth:
@@ -40,4 +48,10 @@ permissions:
       default: true
      simpleauth.command.login:
       description: "Allows logging into an account"
+      default: true
+     simpleauth.command.link:
+      description: "Allows linking to another account"
+      default: true
+     simpleauth.command.unlink:
+      description: "Allows unlinking an account"
       default: true
