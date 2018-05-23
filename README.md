@@ -1,5 +1,7 @@
 # SimpleAuth
 
+	 All servers now require Xbox accounts to log in, so SimpleAuth has no purpose anymore, and should not be used for current servers.
+
 Plugin for PocketMine-MP that prevents people to impersonate an account, requering registration and login when connecting.
 
 	 SimpleAuth plugin for PocketMine-MP
